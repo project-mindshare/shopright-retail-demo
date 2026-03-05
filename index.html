@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShopRight — Retail Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0a0d14;
+  --surface: #111520;
+  --surface2: #161c2d;
+  --surface3: #1c2438;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8eaf0;
+  --text2: #8b91a8;
+  --text3: #5a6177;
+  --accent: #4f7cff;
+  --accent2: #7c5cfc;
+  --green: #22d87a;
+  --red: #ff4d6d;
+  --orange: #ff9640;
+  --yellow: #ffd166;
+  --teal: #06d6b0;
+  --pink: #ff6b9d;
+  --card-radius: 14px;
+  --font-body: 'DM Sans', sans-serif;
+  --font-heading: 'DM Serif Display', serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100vh; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 14px; }
+
+/* LAYOUT */
+.app { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 240px; min-width: 240px; background: var(--surface);
+  border-right: 1px solid var(--border); display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; overflow-y: auto;
+}
+.main { margin-left: 240px; flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+}
+.content { padding: 28px; flex: 1; }
+
+/* SIDEBAR */
+.logo-area { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+.logo-wordmark { font-family: var(--font-heading); font-size: 22px; color: #fff; letter-spacing: -0.3px; }
+.logo-subtitle { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-top: 2px; }
+.nav { padding: 12px 10px; flex: 1; }
+.nav-section-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); padding: 12px 10px 6px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  border-radius: 8px; cursor: pointer; color: var(--text2); font-size: 13.5px; font-weight: 500;
+  transition: all 0.15s; margin-bottom: 2px; position: relative;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(79,124,255,0.12); color: var(--accent); }
+.nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:70%; background:var(--accent); border-radius:0 3px 3px 0; }
+.nav-icon { width: 16px; height: 16px; flex-shrink: 0; }
+.sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+.store-badge { background: var(--surface2); border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 10px; }
+.store-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(34,216,122,0.3); }
+.store-info { font-size: 12px; }
+.store-name { color: var(--text); font-weight: 600; }
+.store-status { color: var(--green); font-size: 11px; margin-top: 1px; }
+
+/* TOPBAR */
+.topbar-title { font-family: var(--font-heading); font-size: 20px; color: #fff; }
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.date-badge { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 6px 14px; font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 6px; }
+.live-badge { background: rgba(34,216,122,0.1); border: 1px solid rgba(34,216,122,0.25); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--green); display: flex; align-items: center; gap: 6px; }
+.live-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+/* KPI CARDS */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.kpi-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--card-radius); padding: 20px; position: relative; overflow: hidden;
+  transition: border-color 0.2s;
+}
+.kpi-card:hover { border-color: var(--border2); }
+.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.kpi-card.blue::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.kpi-card.green::before { background: linear-gradient(90deg, var(--green), var(--teal)); }
+.kpi-card.orange::before { background: linear-gradient(90deg, var(--orange), var(--yellow)); }
+.kpi-card.pink::before { background: linear-gradient(90deg, var(--pink), var(--accent2)); }
+.kpi-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.kpi-label { font-size: 11.5px; font-weight: 600; color: var(--text2); letter-spacing: 0.3px; text-transform: uppercase; }
+.kpi-icon-wrap { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+.kpi-icon-wrap.blue { background: rgba(79,124,255,0.12); color: var(--accent); }
+.kpi-icon-wrap.green { background: rgba(34,216,122,0.12); color: var(--green); }
+.kpi-icon-wrap.orange { background: rgba(255,150,64,0.12); color: var(--orange); }
+.kpi-icon-wrap.pink { background: rgba(255,107,157,0.12); color: var(--pink); }
+.kpi-value { font-family: var(--font-heading); font-size: 28px; color: #fff; line-height: 1; margin-bottom: 8px; }
+.kpi-delta { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+.kpi-delta.up { background: rgba(34,216,122,0.1); color: var(--green); }
+.kpi-delta.down { background: rgba(255,77,109,0.1); color: var(--red); }
+.kpi-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* CHARTS */
+.chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--card-radius); padding: 20px; min-width: 0;
+}
+.chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.chart-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.chart-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.chart-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+.chart-badge.green { background: rgba(34,216,122,0.1); color: var(--green); }
+.chart-badge.blue { background: rgba(79,124,255,0.1); color: var(--accent); }
+.chart-badge.orange { background: rgba(255,150,64,0.1); color: var(--orange); }
+
+/* AI INSIGHTS */
+.insights-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.insight-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px;
+}
+.insight-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.insight-icon.opportunity { background: rgba(255,209,102,0.1); color: var(--yellow); }
+.insight-icon.risk { background: rgba(255,77,109,0.1); color: var(--red); }
+.insight-icon.growth { background: rgba(34,216,122,0.1); color: var(--green); }
+.insight-icon.positive { background: rgba(79,124,255,0.1); color: var(--accent); }
+.insight-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.insight-label.opportunity { color: var(--yellow); }
+.insight-label.risk { color: var(--red); }
+.insight-label.growth { color: var(--green); }
+.insight-label.positive { color: var(--accent); }
+.insight-text { font-size: 12.5px; color: var(--text2); line-height: 1.5; }
+
+/* SECTION HEADER */
+.section-header { margin-bottom: 20px; }
+.section-title { font-family: var(--font-heading); font-size: 22px; color: #fff; margin-bottom: 4px; }
+.section-desc { font-size: 13px; color: var(--text3); }
+
+/* TABLES */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+.data-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); color: var(--text); }
+.rank-num { width: 24px; height: 24px; background: var(--surface3); border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text3); }
+.rank-num.top { background: rgba(79,124,255,0.15); color: var(--accent); }
+.progress-bar-wrap { background: var(--surface3); border-radius: 4px; height: 5px; width: 100%; margin-top: 4px; }
+.progress-bar-fill { height: 5px; border-radius: 4px; }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 10px; padding: 4px; margin-bottom: 20px; width: fit-content; }
+.tab { padding: 7px 18px; border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2); transition: all 0.15s; white-space: nowrap; }
+.tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.tab:hover:not(.active) { color: var(--text); }
+
+/* CUSTOM LEGEND */
+.custom-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+/* STORE LEADERBOARD */
+.store-row { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.store-row:last-child { border-bottom: none; }
+.store-rank { font-size: 13px; font-weight: 700; color: var(--text3); width: 20px; text-align: center; flex-shrink: 0; }
+.store-info2 { flex: 1; min-width: 0; }
+.store-name2 { font-size: 13px; font-weight: 600; color: var(--text); }
+.store-loc { font-size: 11px; color: var(--text3); }
+.store-rev { font-size: 14px; font-weight: 700; color: var(--text); text-align: right; }
+.store-delta2 { font-size: 11px; font-weight: 600; text-align: right; }
+.store-bar-wrap { width: 80px; flex-shrink: 0; }
+
+/* HEATMAP */
+.heatmap { display: grid; grid-template-columns: 40px repeat(7, 1fr); gap: 3px; }
+.heatmap-cell { height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+.heatmap-label { font-size: 10px; color: var(--text3); display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; }
+.heatmap-header { font-size: 10px; color: var(--text3); text-align: center; padding-bottom: 2px; }
+
+/* CAMPAIGN CARDS */
+.campaign-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.campaign-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.campaign-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.campaign-type { font-size: 11px; color: var(--text3); margin-bottom: 12px; }
+.campaign-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.campaign-metric-label { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.campaign-metric-value { font-size: 16px; font-weight: 700; color: var(--text); margin-top: 2px; }
+.campaign-roi { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
+
+/* SENTIMENT */
+.sentiment-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px; margin: 10px 0; }
+.sentiment-segment { border-radius: 2px; }
+.review-dist { display: flex; flex-direction: column; gap: 8px; }
+.review-row { display: flex; align-items: center; gap: 10px; }
+.review-stars { display: flex; gap: 1px; }
+.star-filled { color: var(--yellow); font-size: 11px; }
+.star-empty { color: var(--text3); font-size: 11px; }
+.review-bar { flex: 1; background: var(--surface3); border-radius: 3px; height: 6px; overflow: hidden; }
+.review-bar-fill { height: 100%; border-radius: 3px; background: var(--yellow); }
+.review-pct { font-size: 11px; color: var(--text3); width: 30px; text-align: right; }
+
+/* CATEGORY ICONS */
+.cat-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+/* MODULE HIDDEN */
+.module { display: none; }
+.module.active { display: block; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+svg text { font-family: var(--font-body) !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-area">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <img src="https://www.shopright.ky/icons/icons_0/favicon.ico" width="28" height="28" alt="ShopRight" style="border-radius:6px;flex-shrink:0;" onerror="this.style.display='none'"/>
+        <div>
+          <div class="logo-wordmark">ShopRight</div>
+          <div class="logo-subtitle">Retail Intelligence</div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section-label">Analytics</div>
+      <div class="nav-item active" onclick="showModule('overview',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Executive Overview
+      </div>
+      <div class="nav-item" onclick="showModule('stores',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Store Performance
+      </div>
+      <div class="nav-item" onclick="showModule('categories',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="6" height="18" rx="1"/><rect x="10" y="8" width="6" height="13" rx="1"/><rect x="18" y="5" width="6" height="16" rx="1"/></svg>
+        Category Intelligence
+      </div>
+      <div class="nav-item" onclick="showModule('inventory',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Inventory & Supply
+      </div>
+      <div class="nav-section-label">Customers</div>
+      <div class="nav-item" onclick="showModule('customers',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Customer Behavior
+      </div>
+      <div class="nav-item" onclick="showModule('marketing',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Promotions & Marketing
+      </div>
+      <div class="nav-item" onclick="showModule('sentiment',this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Customer Feedback
+      </div>
+      <div class="nav-item" onclick="showModule('social',this)" style="position:relative">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Social Listening
+        <span style="margin-left:auto;background:linear-gradient(90deg,#4f7cff,#7c5cfc);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;letter-spacing:0.5px">NEW</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="store-badge">
+        <div class="store-dot"></div>
+        <div class="store-info">
+          <div class="store-name">All 12 Locations</div>
+          <div class="store-status">● Live Data Sync</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="page-title">Executive Retail Overview</div>
+      </div>
+      <div class="topbar-right">
+        <div class="date-badge">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          March 2026 · MTD
+        </div>
+        <div class="live-badge"><div class="live-dot"></div>Live</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- MODULE 1: EXECUTIVE OVERVIEW -->
+      <div class="module active" id="mod-overview">
+        <div class="section-header">
+          <div class="section-title">Executive Retail Overview</div>
+          <div class="section-desc">Enterprise-wide performance across all 12 ShopRight locations · 3 regions</div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card blue">
+            <div class="kpi-top">
+              <div class="kpi-label">Total Revenue MTD</div>
+              <div class="kpi-icon-wrap blue">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value">$4.82M</div>
+            <div><span class="kpi-delta up">↑ 14.3%</span></div>
+            <div class="kpi-sub">vs. $4.22M last month</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-top">
+              <div class="kpi-label">Total Transactions</div>
+              <div class="kpi-icon-wrap green">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value">198.4K</div>
+            <div><span class="kpi-delta up">↑ 9.1%</span></div>
+            <div class="kpi-sub">Across all 12 stores</div>
+          </div>
+          <div class="kpi-card orange">
+            <div class="kpi-top">
+              <div class="kpi-label">Avg Basket Value</div>
+              <div class="kpi-icon-wrap orange">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value">$24.30</div>
+            <div><span class="kpi-delta up">↑ 4.7%</span></div>
+            <div class="kpi-sub">Items per basket: 8.4</div>
+          </div>
+          <div class="kpi-card pink">
+            <div class="kpi-top">
+              <div class="kpi-label">Store Foot Traffic</div>
+              <div class="kpi-icon-wrap pink">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value">312.7K</div>
+            <div><span class="kpi-delta up">↑ 6.8%</span></div>
+            <div class="kpi-sub">Conversion rate: 63.4%</div>
+          </div>
+          <div class="kpi-card blue">
+            <div class="kpi-top">
+              <div class="kpi-label">Inventory Turnover</div>
+              <div class="kpi-icon-wrap blue">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value">8.4×</div>
+            <div><span class="kpi-delta up">↑ 1.2×</span></div>
+            <div class="kpi-sub">Industry avg: 6.8×</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-top">
+              <div class="kpi-label">Out-of-Stock Rate</div>
+              <div class="kpi-icon-wrap green">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value">2.1%</div>
+            <div><span class="kpi-delta up">↓ 0.8%</span></div>
+            <div class="kpi-sub">Target: below 3%</div>
+          </div>
+          <div class="kpi-card orange">
+            <div class="kpi-top">
+              <div class="kpi-label">Cust. Satisfaction</div>
+              <div class="kpi-icon-wrap orange">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value">4.4</div>
+            <div><span class="kpi-delta up">↑ 0.2</span></div>
+            <div class="kpi-sub">Out of 5.0 stars</div>
+          </div>
+          <div class="kpi-card pink">
+            <div class="kpi-top">
+              <div class="kpi-label">Revenue Growth</div>
+              <div class="kpi-icon-wrap pink">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value">+18.7%</div>
+            <div><span class="kpi-delta up">↑ YoY</span></div>
+            <div class="kpi-sub">Best in 3 fiscal years</div>
+          </div>
+        </div>
+
+        <!-- Revenue trend + store comparison -->
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">12-Month Revenue Trend</div>
+                <div class="chart-subtitle">Total revenue across all stores</div>
+              </div>
+              <span class="chart-badge green">+18.7% YoY</span>
+            </div>
+            <div id="revenue-trend-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Category Sales Mix</div>
+                <div class="chart-subtitle">Revenue by department</div>
+              </div>
+            </div>
+            <div id="category-pie-chart"></div>
+            <div class="custom-legend" id="cat-legend"></div>
+          </div>
+        </div>
+
+        <!-- Traffic + AI Insights -->
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Customer Traffic Trend</div>
+                <div class="chart-subtitle">Weekly visitors across all locations</div>
+              </div>
+              <span class="chart-badge blue">+6.8% MoM</span>
+            </div>
+            <div id="traffic-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">AI Intelligence Alerts</div>
+                <div class="chart-subtitle">Automated retail insights · Updated weekly</div>
+              </div>
+              <span class="chart-badge orange">4 New</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+              <div class="insight-card">
+                <div class="insight-icon growth"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+                <div><div class="insight-label growth">Growth Signal</div><div class="insight-text">Weekend traffic generating <strong style="color:var(--green)">38%</strong> of weekly revenue — optimize weekend staffing levels</div></div>
+              </div>
+              <div class="insight-card">
+                <div class="insight-icon opportunity"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/></svg></div>
+                <div><div class="insight-label opportunity">Opportunity</div><div class="insight-text">Beverage category growing <strong style="color:var(--yellow)">22% YoY</strong> — expand shelf space in top 4 locations</div></div>
+              </div>
+              <div class="insight-card">
+                <div class="insight-icon positive"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div><div class="insight-label positive">Top Performer</div><div class="insight-text">Downtown location outperforming all stores by <strong style="color:var(--accent)">31%</strong> revenue per sq ft</div></div>
+              </div>
+              <div class="insight-card">
+                <div class="insight-icon risk"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+                <div><div class="insight-label risk">Risk Alert</div><div class="insight-text">Mall locations showing <strong style="color:var(--red)">-12% traffic</strong> decline — review lease renewal strategy</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 2: STORE PERFORMANCE -->
+      <div class="module" id="mod-stores">
+        <div class="section-header">
+          <div class="section-title">Store Performance Analytics</div>
+          <div class="section-desc">Individual location tracking across 12 stores · 3 regions</div>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kpi-card blue"><div class="kpi-top"><div class="kpi-label">Top Store Revenue</div><div class="kpi-icon-wrap blue"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div></div><div class="kpi-value">$548K</div><div><span class="kpi-delta up">↑ 22.1%</span></div><div class="kpi-sub">Store #4 — Downtown</div></div>
+          <div class="kpi-card green"><div class="kpi-top"><div class="kpi-label">Avg Conversion Rate</div><div class="kpi-icon-wrap green"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div></div><div class="kpi-value">63.4%</div><div><span class="kpi-delta up">↑ 3.2%</span></div><div class="kpi-sub">Visitor to purchaser rate</div></div>
+          <div class="kpi-card orange"><div class="kpi-top"><div class="kpi-label">Best Basket Value</div><div class="kpi-icon-wrap orange"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div></div><div class="kpi-value">$31.40</div><div><span class="kpi-delta up">↑ 8.9%</span></div><div class="kpi-sub">Store #7 — Suburban West</div></div>
+          <div class="kpi-card pink"><div class="kpi-top"><div class="kpi-label">Staff Productivity</div><div class="kpi-icon-wrap pink"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div></div><div class="kpi-value">$8,240</div><div><span class="kpi-delta up">↑ 5.4%</span></div><div class="kpi-sub">Revenue per staff member</div></div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Store Revenue Leaderboard</div><div class="chart-subtitle">Monthly revenue by location</div></div><span class="chart-badge blue">12 Stores</span></div>
+            <div id="store-bar-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Top Performing Stores</div><div class="chart-subtitle">Ranked by MTD revenue</div></div></div>
+            <div id="store-leaderboard"></div>
+          </div>
+        </div>
+
+        <div class="chart-grid-2">
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Store Traffic Comparison</div><div class="chart-subtitle">Weekly foot traffic by location</div></div></div>
+            <div id="store-traffic-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">AI Store Insights</div><div class="chart-subtitle">Location-specific recommendations</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+              <div class="insight-card"><div class="insight-icon positive"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="insight-label positive">Top Performer</div><div class="insight-text">Store #4 generating <strong style="color:var(--accent)">highest revenue per sq ft</strong> at $842/mo — replicate store layout system-wide</div></div></div>
+              <div class="insight-card"><div class="insight-icon opportunity"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/></svg></div><div><div class="insight-label opportunity">Opportunity</div><div class="insight-text">Suburban stores showing <strong style="color:var(--yellow)">18% higher</strong> basket values — consider premium product expansion</div></div></div>
+              <div class="insight-card"><div class="insight-icon risk"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div><div><div class="insight-label risk">Risk Alert</div><div class="insight-text">Mall locations experiencing <strong style="color:var(--red)">-12% traffic</strong> decline — initiate customer win-back campaigns</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 3: CATEGORIES -->
+      <div class="module" id="mod-categories">
+        <div class="section-header">
+          <div class="section-title">Product Category Intelligence</div>
+          <div class="section-desc">Performance across 8 departments · 150 active SKUs</div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card blue"><div class="kpi-top"><div class="kpi-label">Top Category</div><div class="kpi-icon-wrap blue"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="6" height="18" rx="1"/><rect x="10" y="8" width="6" height="13" rx="1"/><rect x="18" y="5" width="6" height="16" rx="1"/></svg></div></div><div class="kpi-value">Beverages</div><div><span class="kpi-delta up">↑ 22% YoY</span></div><div class="kpi-sub">$940K MTD revenue</div></div>
+          <div class="kpi-card green"><div class="kpi-top"><div class="kpi-label">Highest Margin</div><div class="kpi-icon-wrap green"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div></div><div class="kpi-value">Snacks</div><div><span class="kpi-delta up">↑ 34.2%</span></div><div class="kpi-sub">Profit margin category</div></div>
+          <div class="kpi-card orange"><div class="kpi-top"><div class="kpi-label">Fastest Growing</div><div class="kpi-icon-wrap orange"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div></div><div class="kpi-value">Frozen</div><div><span class="kpi-delta up">↑ 28.4%</span></div><div class="kpi-sub">Winter demand surge</div></div>
+          <div class="kpi-card pink"><div class="kpi-top"><div class="kpi-label">Active SKUs</div><div class="kpi-icon-wrap pink"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div></div><div class="kpi-value">150</div><div><span class="kpi-delta up">↑ 12 New</span></div><div class="kpi-sub">Across 8 categories</div></div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Category Revenue Comparison</div><div class="chart-subtitle">MTD revenue by department</div></div></div>
+            <div id="category-bar-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Category Growth Rates</div><div class="chart-subtitle">Year-over-year performance</div></div></div>
+            <div id="category-growth-chart"></div>
+          </div>
+        </div>
+
+        <div class="chart-card" style="margin-bottom:24px">
+          <div class="chart-header"><div><div class="chart-title">Top Selling Products by Category</div><div class="chart-subtitle">Leading SKUs ranked by revenue contribution</div></div><span class="chart-badge blue">150 SKUs</span></div>
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Product</th><th>Category</th><th>Units Sold</th><th>Revenue</th><th>Margin</th><th>Trend</th></tr></thead>
+            <tbody id="top-products-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MODULE 4: INVENTORY -->
+      <div class="module" id="mod-inventory">
+        <div class="section-header">
+          <div class="section-title">Inventory & Supply Chain Intelligence</div>
+          <div class="section-desc">Stock monitoring · Supplier performance · Shrinkage tracking</div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card blue"><div class="kpi-top"><div class="kpi-label">Inventory Turnover</div><div class="kpi-icon-wrap blue"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg></div></div><div class="kpi-value">8.4×</div><div><span class="kpi-delta up">↑ vs 6.8× avg</span></div><div class="kpi-sub">Industry outperformance</div></div>
+          <div class="kpi-card green"><div class="kpi-top"><div class="kpi-label">Supplier Fill Rate</div><div class="kpi-icon-wrap green"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div></div><div class="kpi-value">94.2%</div><div><span class="kpi-delta up">↑ 2.1%</span></div><div class="kpi-sub">On-time deliveries</div></div>
+          <div class="kpi-card orange"><div class="kpi-top"><div class="kpi-label">Out-of-Stock Rate</div><div class="kpi-icon-wrap orange"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div></div><div class="kpi-value">2.1%</div><div><span class="kpi-delta up">↓ 0.8%</span></div><div class="kpi-sub">Below 3% target ✓</div></div>
+          <div class="kpi-card pink"><div class="kpi-top"><div class="kpi-label">Shrinkage Rate</div><div class="kpi-icon-wrap pink"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div></div><div class="kpi-value">0.82%</div><div><span class="kpi-delta up">↓ 0.14%</span></div><div class="kpi-sub">Loss prevention improving</div></div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Inventory Turnover by Category</div><div class="chart-subtitle">Turnover rate per department</div></div></div>
+            <div id="inventory-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Stock Status Overview</div><div class="chart-subtitle">Current inventory health</div></div></div>
+            <div id="stock-status-chart"></div>
+            <div class="custom-legend" id="stock-legend"></div>
+          </div>
+        </div>
+
+        <div class="chart-grid-2">
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Supplier Performance</div><div class="chart-subtitle">Fill rate and on-time delivery</div></div></div>
+            <div id="supplier-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">AI Inventory Alerts</div><div class="chart-subtitle">Automated supply chain insights</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+              <div class="insight-card"><div class="insight-icon risk"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div><div><div class="insight-label risk">Stockout Risk</div><div class="insight-text">Dairy category experiencing <strong style="color:var(--red)">frequent stockouts</strong> — increase reorder frequency by 40%</div></div></div>
+              <div class="insight-card"><div class="insight-icon risk"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div><div><div class="insight-label risk">Supplier Delay</div><div class="insight-text">Supplier B showing <strong style="color:var(--red)">3-day avg delay</strong> trend this month — consider backup vendor qualification</div></div></div>
+              <div class="insight-card"><div class="insight-icon growth"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div><div class="insight-label growth">Efficiency Win</div><div class="insight-text">Produce department <strong style="color:var(--green)">highest turnover</strong> at 12.4× — model ordering system for other categories</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 5: CUSTOMERS -->
+      <div class="module" id="mod-customers">
+        <div class="section-header">
+          <div class="section-title">Customer Behavior & Shopping Patterns</div>
+          <div class="section-desc">10,000+ active customers · Traffic patterns · Segmentation</div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card blue"><div class="kpi-top"><div class="kpi-label">Total Customers</div><div class="kpi-icon-wrap blue"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div></div><div class="kpi-value">10,420</div><div><span class="kpi-delta up">↑ 8.2%</span></div><div class="kpi-sub">Active in last 30 days</div></div>
+          <div class="kpi-card green"><div class="kpi-top"><div class="kpi-label">Repeat Customers</div><div class="kpi-icon-wrap green"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg></div></div><div class="kpi-value">68.4%</div><div><span class="kpi-delta up">↑ 4.1%</span></div><div class="kpi-sub">Loyalty retention rate</div></div>
+          <div class="kpi-card orange"><div class="kpi-top"><div class="kpi-label">Loyalty Revenue</div><div class="kpi-icon-wrap orange"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div></div><div class="kpi-value">45%</div><div><span class="kpi-delta up">↑ 3.8%</span></div><div class="kpi-sub">From loyalty members</div></div>
+          <div class="kpi-card pink"><div class="kpi-top"><div class="kpi-label">Peak Hour</div><div class="kpi-icon-wrap pink"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div><div class="kpi-value">5–7 PM</div><div><span class="kpi-delta up">↑ 22% more</span></div><div class="kpi-sub">Evening peak traffic window</div></div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Traffic Heatmap by Hour</div><div class="chart-subtitle">Customer visits by time of day & day of week</div></div></div>
+            <div id="heatmap-container" style="margin-top:8px;"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Customer Segmentation</div><div class="chart-subtitle">By shopping behavior profile</div></div></div>
+            <div id="segment-pie-chart"></div>
+            <div class="custom-legend" id="segment-legend"></div>
+          </div>
+        </div>
+
+        <div class="chart-grid-2">
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Basket Size Distribution</div><div class="chart-subtitle">Transaction value frequency</div></div></div>
+            <div id="basket-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">AI Customer Insights</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+              <div class="insight-card"><div class="insight-icon growth"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div><div class="insight-label growth">Spending Pattern</div><div class="insight-text">Evening shoppers spend <strong style="color:var(--green)">20% more</strong> per visit — extend evening hours at 4 top stores</div></div></div>
+              <div class="insight-card"><div class="insight-icon opportunity"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="6"/></svg></div><div><div class="insight-label opportunity">Weekend Behavior</div><div class="insight-text">Families purchasing <strong style="color:var(--yellow)">larger baskets on weekends</strong> — promote bundle deals Sat/Sun</div></div></div>
+              <div class="insight-card"><div class="insight-icon positive"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="insight-label positive">Loyalty Impact</div><div class="insight-text">Loyalty members generate <strong style="color:var(--accent)">45% of total revenue</strong> with 2.3× higher basket value</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 6: MARKETING -->
+      <div class="module" id="mod-marketing">
+        <div class="section-header">
+          <div class="section-title">Promotions & Marketing Performance</div>
+          <div class="section-desc">10 active campaigns · ROI tracking · Channel attribution</div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card blue"><div class="kpi-top"><div class="kpi-label">Campaign Revenue Lift</div><div class="kpi-icon-wrap blue"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div></div><div class="kpi-value">+$640K</div><div><span class="kpi-delta up">↑ 18.3%</span></div><div class="kpi-sub">Incremental revenue MTD</div></div>
+          <div class="kpi-card green"><div class="kpi-top"><div class="kpi-label">Avg Campaign ROI</div><div class="kpi-icon-wrap green"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div></div><div class="kpi-value">3.8×</div><div><span class="kpi-delta up">↑ 0.6×</span></div><div class="kpi-sub">Return on ad spend</div></div>
+          <div class="kpi-card orange"><div class="kpi-top"><div class="kpi-label">Coupon Redemption</div><div class="kpi-icon-wrap orange"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div></div><div class="kpi-value">34.7%</div><div><span class="kpi-delta up">↑ 6.2%</span></div><div class="kpi-sub">Promo code usage rate</div></div>
+          <div class="kpi-card pink"><div class="kpi-top"><div class="kpi-label">Email Conversions</div><div class="kpi-icon-wrap pink"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg></div></div><div class="kpi-value">12.4%</div><div><span class="kpi-delta up">↑ 2.8%</span></div><div class="kpi-sub">Email to purchase rate</div></div>
+        </div>
+
+        <div class="chart-card" style="margin-bottom:24px">
+          <div class="chart-header"><div><div class="chart-title">Active Campaign Performance</div><div class="chart-subtitle">Revenue lift and ROI by campaign</div></div><span class="chart-badge green">10 Campaigns</span></div>
+          <div class="campaign-grid" id="campaign-grid"></div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Marketing Channel Attribution</div><div class="chart-subtitle">Revenue by channel source</div></div></div>
+            <div id="channel-chart"></div>
+            <div class="custom-legend" id="channel-legend"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Promotion Revenue Lift</div><div class="chart-subtitle">Week-over-week campaign impact</div></div></div>
+            <div id="lift-chart"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 7: SENTIMENT -->
+      <div class="module" id="mod-sentiment">
+        <div class="section-header">
+          <div class="section-title">Customer Feedback & Brand Sentiment</div>
+          <div class="section-desc">1,200 reviews analyzed · Multi-channel feedback · NPS tracking</div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card blue"><div class="kpi-top"><div class="kpi-label">Cust. Sat. Score</div><div class="kpi-icon-wrap blue"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div></div><div class="kpi-value">4.4/5</div><div><span class="kpi-delta up">↑ 0.2</span></div><div class="kpi-sub">Across all locations</div></div>
+          <div class="kpi-card green"><div class="kpi-top"><div class="kpi-label">Net Promoter Score</div><div class="kpi-icon-wrap green"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div></div><div class="kpi-value">+62</div><div><span class="kpi-delta up">↑ +8</span></div><div class="kpi-sub">Industry avg: +42</div></div>
+          <div class="kpi-card orange"><div class="kpi-top"><div class="kpi-label">Positive Review Rate</div><div class="kpi-icon-wrap orange"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div></div><div class="kpi-value">84.2%</div><div><span class="kpi-delta up">↑ 3.1%</span></div><div class="kpi-sub">4+ star ratings</div></div>
+          <div class="kpi-card pink"><div class="kpi-top"><div class="kpi-label">Avg Response Time</div><div class="kpi-icon-wrap pink"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div><div class="kpi-value">2.4 hrs</div><div><span class="kpi-delta up">↓ 0.8 hrs</span></div><div class="kpi-sub">Complaint resolution</div></div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Sentiment Trend</div><div class="chart-subtitle">Positive vs neutral vs negative reviews over time</div></div></div>
+            <div id="sentiment-trend-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Review Rating Distribution</div><div class="chart-subtitle">Star rating breakdown · 1,200 reviews</div></div></div>
+            <div id="review-dist"></div>
+          </div>
+        </div>
+
+        <div class="chart-grid-2">
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Complaint Categories</div><div class="chart-subtitle">Issues by frequency</div></div></div>
+            <div id="complaint-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">AI Sentiment Insights</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+              <div class="insight-card"><div class="insight-icon risk"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div><div><div class="insight-label risk">Key Pain Point</div><div class="insight-text">Checkout wait times causing <strong style="color:var(--red)">negative reviews</strong> — deploy self-checkout at 3 busiest stores</div></div></div>
+              <div class="insight-card"><div class="insight-icon positive"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="insight-label positive">Positive Signal</div><div class="insight-text">Produce freshness consistently <strong style="color:var(--accent)">praised</strong> in recent reviews — leverage in marketing materials</div></div></div>
+              <div class="insight-card"><div class="insight-icon growth"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div><div class="insight-label growth">Improvement Trend</div><div class="insight-text">Store cleanliness mentions up <strong style="color:var(--green)">+18%</strong> — hygiene initiatives showing measurable customer satisfaction impact</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 8: SOCIAL LISTENING -->
+      <div class="module" id="mod-social">
+        <div class="section-header">
+          <div class="section-title">Social Listening & Competitive Intelligence</div>
+          <div class="section-desc">Real-time brand monitoring · Competitor tracking · Multi-platform sentiment across all 12 locations</div>
+        </div>
+
+        <!-- KPI row -->
+        <div class="kpi-grid">
+          <div class="kpi-card blue">
+            <div class="kpi-top"><div class="kpi-label">Total Mentions</div><div class="kpi-icon-wrap blue"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div></div>
+            <div class="kpi-value">14,820</div>
+            <div><span class="kpi-delta up">↑ 22.4%</span></div>
+            <div class="kpi-sub">Across all platforms · MTD</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-top"><div class="kpi-label">Brand Sentiment Score</div><div class="kpi-icon-wrap green"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div></div>
+            <div class="kpi-value">+71</div>
+            <div><span class="kpi-delta up">↑ +9 pts</span></div>
+            <div class="kpi-sub">vs. competitors avg +48</div>
+          </div>
+          <div class="kpi-card orange">
+            <div class="kpi-top"><div class="kpi-label">Share of Voice</div><div class="kpi-icon-wrap orange"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div></div>
+            <div class="kpi-value">38.4%</div>
+            <div><span class="kpi-delta up">↑ 4.2%</span></div>
+            <div class="kpi-sub">Leading in Cayman Islands</div>
+          </div>
+          <div class="kpi-card pink">
+            <div class="kpi-top"><div class="kpi-label">Viral Posts</div><div class="kpi-icon-wrap pink"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div></div>
+            <div class="kpi-value">34</div>
+            <div><span class="kpi-delta up">↑ 12 new</span></div>
+            <div class="kpi-sub">10K+ impressions each</div>
+          </div>
+        </div>
+
+        <!-- Platform breakdown + Competitor share -->
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div><div class="chart-title">Mentions by Platform</div><div class="chart-subtitle">Volume and sentiment per channel · MTD</div></div>
+              <span class="chart-badge blue">6 Platforms</span>
+            </div>
+            <div id="social-platform-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div><div class="chart-title">Competitive Share of Voice</div><div class="chart-subtitle">Online presence vs. key competitors</div></div>
+            </div>
+            <div id="comp-sov-chart"></div>
+            <div class="custom-legend" id="sov-legend"></div>
+          </div>
+        </div>
+
+        <!-- Mention trend + Topic cloud -->
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div><div class="chart-title">Brand Mention Trend</div><div class="chart-subtitle">Weekly volume: ShopRight vs. top competitor</div></div>
+            </div>
+            <div id="mention-trend-chart"></div>
+            <div class="custom-legend" style="margin-top:10px" id="mention-legend"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div><div class="chart-title">Top Conversation Topics</div><div class="chart-subtitle">What people are saying about ShopRight</div></div>
+              <span class="chart-badge green">Positive ↑</span>
+            </div>
+            <div id="topic-bubbles"></div>
+          </div>
+        </div>
+
+        <!-- Location sentiment heatmap -->
+        <div class="chart-card" style="margin-bottom:24px">
+          <div class="chart-header">
+            <div><div class="chart-title">Sentiment by Location</div><div class="chart-subtitle">Per-store online reputation across all 12 ShopRight locations</div></div>
+            <span class="chart-badge orange">All Regions</span>
+          </div>
+          <div id="location-sentiment-grid"></div>
+        </div>
+
+        <!-- Competitor intel table + AI insights -->
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">Competitor Intelligence Feed</div><div class="chart-subtitle">Latest signals from competing grocery chains</div></div></div>
+            <table class="data-table">
+              <thead><tr><th>Competitor</th><th>Sentiment</th><th>Key Topics</th><th>Mentions</th><th>vs. ShopRight</th></tr></thead>
+              <tbody id="competitor-table"></tbody>
+            </table>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><div><div class="chart-title">AI Social Intelligence</div><div class="chart-subtitle">Automated signals from brand monitoring</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+              <div class="insight-card"><div class="insight-icon growth"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div><div class="insight-label growth">Trending</div><div class="insight-text">Posts tagging <strong style="color:var(--green)">#ShopRightFresh</strong> grew 180% this month — amplify UGC campaign immediately</div></div></div>
+              <div class="insight-card"><div class="insight-icon opportunity"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/></svg></div><div><div class="insight-label opportunity">Competitor Gap</div><div class="insight-text">Competitor FreshMart receiving <strong style="color:var(--yellow)">negative buzz</strong> on checkout wait times — opportunity to promote ShopRight Express Lanes</div></div></div>
+              <div class="insight-card"><div class="insight-icon risk"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div><div><div class="insight-label risk">Reputation Risk</div><div class="insight-text">Store #11 (Westfield Mall) has <strong style="color:var(--red)">declining social sentiment</strong> — 3 viral negative posts this week, needs immediate attention</div></div></div>
+              <div class="insight-card"><div class="insight-icon positive"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="insight-label positive">Influence Win</div><div class="insight-text">2 local food influencers (combined 84K followers) <strong style="color:var(--accent)">organically posted</strong> about ShopRight produce — engage for ambassador program</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const months = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+const revenueData = [
+  {m:'Apr',rev:3.1,traffic:220},{m:'May',rev:3.4,traffic:235},{m:'Jun',rev:3.6,traffic:248},
+  {m:'Jul',rev:3.3,traffic:226},{m:'Aug',rev:3.7,traffic:252},{m:'Sep',rev:3.9,traffic:261},
+  {m:'Oct',rev:4.0,traffic:268},{m:'Nov',rev:4.3,traffic:290},{m:'Dec',rev:4.8,traffic:330},
+  {m:'Jan',rev:4.1,traffic:274},{m:'Feb',rev:4.5,traffic:298},{m:'Mar',rev:4.82,traffic:313}
+].map(d=>({...d, rev: d.rev*1000}));
+
+const stores = [
+  {name:'Store #4',loc:'Downtown',rev:548,traffic:28400,basket:29.2,conv:72},
+  {name:'Store #7',loc:'Suburban West',rev:492,traffic:24100,basket:31.4,conv:68},
+  {name:'Store #1',loc:'Midtown',rev:468,traffic:26800,basket:27.8,conv:65},
+  {name:'Store #9',loc:'North Quarter',rev:441,traffic:22900,basket:30.1,conv:70},
+  {name:'Store #2',loc:'East Side',rev:424,traffic:21400,basket:28.4,conv:64},
+  {name:'Store #11',loc:'Westfield Mall',rev:398,traffic:31200,basket:22.1,conv:49},
+  {name:'Store #6',loc:'Riverside',rev:381,traffic:19800,basket:26.8,conv:62},
+  {name:'Store #3',loc:'Airport District',rev:362,traffic:18600,basket:27.3,conv:61},
+];
+
+const categories = [
+  {cat:'Beverages',rev:940,units:48200,margin:28,growth:22,color:'#4f7cff'},
+  {cat:'Produce',rev:820,units:62400,margin:18,growth:12,color:'#22d87a'},
+  {cat:'Dairy',rev:710,units:51800,margin:22,growth:8,color:'#06d6b0'},
+  {cat:'Meat',rev:680,units:28900,margin:24,growth:15,color:'#ff9640'},
+  {cat:'Snacks',rev:580,units:44200,margin:34,growth:19,color:'#ffd166'},
+  {cat:'Frozen',rev:490,units:32100,margin:26,growth:28,color:'#7c5cfc'},
+  {cat:'Bakery',rev:340,units:38700,margin:31,growth:11,color:'#ff6b9d'},
+  {cat:'Household',rev:260,units:19800,margin:20,growth:6,color:'#5a6177'},
+];
+
+const topProducts = [
+  {name:'ShopRight Spring Water 24-Pack',cat:'Beverages',units:'12,400',rev:'$148,000',margin:'32%',trend:'+18%'},
+  {name:'Organic Mixed Greens Bag',cat:'Produce',units:'9,800',rev:'$94,080',margin:'22%',trend:'+14%'},
+  {name:'Whole Milk 1-Gallon',cat:'Dairy',units:'8,200',rev:'$65,600',margin:'19%',trend:'+8%'},
+  {name:'Premium Trail Mix 2lb',cat:'Snacks',units:'7,600',rev:'$91,200',margin:'38%',trend:'+24%'},
+  {name:'Sourdough Artisan Loaf',cat:'Bakery',units:'6,400',rev:'$44,800',margin:'36%',trend:'+11%'},
+  {name:'Atlantic Salmon Fillet',cat:'Meat',units:'4,200',rev:'$100,800',margin:'28%',trend:'+19%'},
+  {name:'Frozen Stir-Fry Veggie Blend',cat:'Frozen',units:'5,800',rev:'$52,200',margin:'29%',trend:'+31%'},
+  {name:'Laundry Detergent 64oz',cat:'Household',units:'4,900',rev:'$58,800',margin:'21%',trend:'+7%'},
+];
+
+const inventory = [
+  {cat:'Produce',turnover:12.4,color:'#22d87a'},{cat:'Dairy',turnover:10.2,color:'#06d6b0'},
+  {cat:'Frozen',turnover:8.8,color:'#7c5cfc'},{cat:'Meat',turnover:7.6,color:'#ff9640'},
+  {cat:'Beverages',turnover:9.1,color:'#4f7cff'},{cat:'Bakery',turnover:11.4,color:'#ff6b9d'},
+  {cat:'Snacks',turnover:7.2,color:'#ffd166'},{cat:'Household',turnover:4.8,color:'#5a6177'},
+];
+
+const suppliers = [
+  {name:'Supplier A',fill:97.2,onTime:96.4},{name:'Supplier B',fill:88.4,onTime:81.2},
+  {name:'Supplier C',fill:94.8,onTime:93.1},{name:'Supplier D',fill:96.1,onTime:94.8},
+  {name:'Supplier E',fill:91.3,onTime:89.7},
+];
+
+const campaigns = [
+  {name:'Spring BOGO Snacks',type:'In-Store Promotion',lift:'$124K',roi:'4.2×',redemption:'42%',conversions:'8,400',color:'#4f7cff'},
+  {name:'Email Loyalty Rewards',type:'Email Campaign',lift:'$98K',roi:'5.1×',redemption:'38%',conversions:'6,200',color:'#22d87a'},
+  {name:'Weekend Family Bundle',type:'Multi-Channel',lift:'$87K',roi:'3.8×',redemption:'29%',conversions:'5,100',color:'#7c5cfc'},
+  {name:'Social Flash Sale',type:'Social Media',lift:'$72K',roi:'2.9×',redemption:'21%',conversions:'4,800',color:'#ff9640'},
+  {name:'Beverage Category Push',type:'In-Store + Digital',lift:'$110K',roi:'4.6×',redemption:'35%',conversions:'7,200',color:'#ffd166'},
+  {name:'Produce Freshness Drive',type:'In-Store',lift:'$61K',roi:'3.4×',redemption:'24%',conversions:'3,900',color:'#06d6b0'},
+];
+
+const sentimentData = [
+  {m:'Oct',pos:72,neu:18,neg:10},{m:'Nov',pos:74,neu:17,neg:9},{m:'Dec',pos:76,neu:16,neg:8},
+  {m:'Jan',pos:73,neu:18,neg:9},{m:'Feb',pos:78,neu:15,neg:7},{m:'Mar',pos:81,neu:13,neg:6},
+];
+
+const complaints = [
+  {cat:'Checkout Wait',pct:34,color:'#ff4d6d'},{cat:'Product Availability',pct:26,color:'#ff9640'},
+  {cat:'Pricing Issues',pct:18,color:'#ffd166'},{cat:'Staff Helpfulness',pct:12,color:'#4f7cff'},
+  {cat:'Store Cleanliness',pct:10,color:'#22d87a'},
+];
+
+// ── CHART RENDERER ─────────────────────────────────────────────────────────────
+function svgChart(containerId, w, h, draw) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const cw = container.clientWidth || 500;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width','100%');
+  svg.setAttribute('height', h);
+  svg.setAttribute('viewBox', `0 0 ${cw} ${h}`);
+  svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+  draw(svg, cw, h);
+  container.appendChild(svg);
+}
+
+function text(svg, x, y, txt, opts={}) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg','text');
+  el.setAttribute('x', x); el.setAttribute('y', y);
+  el.setAttribute('fill', opts.fill || '#8b91a8');
+  el.setAttribute('font-size', opts.size || 11);
+  el.setAttribute('font-family', "'DM Sans', sans-serif");
+  el.setAttribute('text-anchor', opts.anchor || 'start');
+  el.setAttribute('dominant-baseline', opts.base || 'auto');
+  if (opts.weight) el.setAttribute('font-weight', opts.weight);
+  el.textContent = txt;
+  svg.appendChild(el);
+  return el;
+}
+
+function rect(svg, x, y, w, h, fill, opts={}) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  el.setAttribute('x', x); el.setAttribute('y', y);
+  el.setAttribute('width', Math.max(0,w)); el.setAttribute('height', Math.max(0,h));
+  el.setAttribute('fill', fill);
+  if (opts.rx) el.setAttribute('rx', opts.rx);
+  if (opts.opacity) el.setAttribute('opacity', opts.opacity);
+  svg.appendChild(el);
+  return el;
+}
+
+function line(svg, x1, y1, x2, y2, stroke, opts={}) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg','line');
+  el.setAttribute('x1',x1);el.setAttribute('y1',y1);el.setAttribute('x2',x2);el.setAttribute('y2',y2);
+  el.setAttribute('stroke', stroke);
+  el.setAttribute('stroke-width', opts.w || 1);
+  if (opts.dash) el.setAttribute('stroke-dasharray', opts.dash);
+  svg.appendChild(el);
+}
+
+function polyline(svg, pts, stroke, opts={}) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+  el.setAttribute('points', pts.map(p=>p.join(',')).join(' '));
+  el.setAttribute('fill','none');
+  el.setAttribute('stroke', stroke);
+  el.setAttribute('stroke-width', opts.w || 2);
+  el.setAttribute('stroke-linejoin','round');
+  el.setAttribute('stroke-linecap','round');
+  svg.appendChild(el);
+}
+
+function areaPoly(svg, pts, fill, stroke) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+  el.setAttribute('points', pts.map(p=>p.join(',')).join(' '));
+  el.setAttribute('fill', fill);
+  el.setAttribute('stroke', stroke);
+  el.setAttribute('stroke-width', 2);
+  svg.appendChild(el);
+}
+
+// ── BUILD CHARTS ───────────────────────────────────────────────────────────────
+
+// Revenue Trend
+function buildRevenueTrend() {
+  svgChart('revenue-trend-chart', 0, 200, (svg, W, H) => {
+    const pad = {t:20,r:20,b:36,l:52};
+    const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+    const vals = revenueData.map(d=>d.rev);
+    const mn = Math.min(...vals)*0.92, mx = Math.max(...vals)*1.05;
+    const sx = i => pad.l + (i/(revenueData.length-1))*cw;
+    const sy = v => pad.t + ch - ((v-mn)/(mx-mn))*ch;
+
+    // Grid
+    [0,0.25,0.5,0.75,1].forEach(t => {
+      const y = pad.t + ch*(1-t);
+      line(svg, pad.l, y, pad.l+cw, y, 'rgba(255,255,255,0.05)');
+      const v = mn + (mx-mn)*t;
+      text(svg, pad.l-6, y, '$'+(v/1000).toFixed(1)+'M', {anchor:'end', base:'middle', size:10});
+    });
+
+    // Area fill
+    const pts = revenueData.map((d,i)=>[sx(i),sy(d.rev)]);
+    const areaPts = [[sx(0),pad.t+ch], ...pts, [sx(revenueData.length-1),pad.t+ch]];
+    const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    const grad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    grad.setAttribute('id','revGrad'); grad.setAttribute('x1','0'); grad.setAttribute('x2','0'); grad.setAttribute('y1','0'); grad.setAttribute('y2','1');
+    const s1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    s1.setAttribute('offset','0%'); s1.setAttribute('stop-color','#4f7cff'); s1.setAttribute('stop-opacity','0.25');
+    const s2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    s2.setAttribute('offset','100%'); s2.setAttribute('stop-color','#4f7cff'); s2.setAttribute('stop-opacity','0.02');
+    grad.appendChild(s1); grad.appendChild(s2); defs.appendChild(grad); svg.appendChild(defs);
+    areaPoly(svg, areaPts, 'url(#revGrad)', 'none');
+    polyline(svg, pts, '#4f7cff', {w:2.5});
+
+    // Dots & labels
+    revenueData.forEach((d,i) => {
+      const cx = sx(i), cy = sy(d.rev);
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',cx); c.setAttribute('cy',cy); c.setAttribute('r',i===revenueData.length-1?5:3);
+      c.setAttribute('fill', i===revenueData.length-1?'#4f7cff':'var(--surface)');
+      c.setAttribute('stroke','#4f7cff'); c.setAttribute('stroke-width',2);
+      svg.appendChild(c);
+      text(svg, cx, H-8, d.m, {anchor:'middle', size:10});
+    });
+  });
+}
+
+// Category Pie
+function buildCategoryPie() {
+  const container = document.getElementById('category-pie-chart');
+  if (!container) return;
+  const W = container.clientWidth || 300, H = 180;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width','100%'); svg.setAttribute('height', H);
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const cx = W/2, cy = H/2, r = Math.min(W,H)*0.42, ir = r*0.55;
+  const total = categories.reduce((a,c)=>a+c.rev,0);
+  let angle = -Math.PI/2;
+  categories.forEach(c => {
+    const sweep = (c.rev/total)*Math.PI*2;
+    const x1=cx+r*Math.cos(angle), y1=cy+r*Math.sin(angle);
+    const x2=cx+r*Math.cos(angle+sweep), y2=cy+r*Math.sin(angle+sweep);
+    const x3=cx+ir*Math.cos(angle+sweep), y3=cy+ir*Math.sin(angle+sweep);
+    const x4=cx+ir*Math.cos(angle), y4=cy+ir*Math.sin(angle);
+    const lg = sweep>Math.PI?1:0;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${x1},${y1} A${r},${r} 0 ${lg} 1 ${x2},${y2} L${x3},${y3} A${ir},${ir} 0 ${lg} 0 ${x4},${y4} Z`);
+    path.setAttribute('fill', c.color); path.setAttribute('stroke','var(--surface)'); path.setAttribute('stroke-width','2');
+    svg.appendChild(path);
+    angle += sweep;
+  });
+  // Center text
+  const t1 = document.createElementNS('http://www.w3.org/2000/svg','text');
+  t1.setAttribute('x',cx); t1.setAttribute('y',cy-6); t1.setAttribute('text-anchor','middle');
+  t1.setAttribute('fill','#fff'); t1.setAttribute('font-size','18'); t1.setAttribute('font-weight','700');
+  t1.setAttribute('font-family',"'DM Serif Display',serif"); t1.textContent='$4.82M';
+  const t2 = document.createElementNS('http://www.w3.org/2000/svg','text');
+  t2.setAttribute('x',cx); t2.setAttribute('y',cy+12); t2.setAttribute('text-anchor','middle');
+  t2.setAttribute('fill','#8b91a8'); t2.setAttribute('font-size','10'); t2.textContent='Total Revenue';
+  svg.appendChild(t1); svg.appendChild(t2);
+  container.appendChild(svg);
+
+  // Legend
+  const legend = document.getElementById('cat-legend');
+  categories.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<div class="legend-dot" style="background:${c.color};border-radius:2px;"></div>${c.cat}`;
+    legend.appendChild(item);
+  });
+}
+
+// Traffic chart
+function buildTrafficChart() {
+  svgChart('traffic-chart', 0, 180, (svg, W, H) => {
+    const pad = {t:16,r:16,b:36,l:44};
+    const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+    const vals = revenueData.map(d=>d.traffic);
+    const mn = Math.min(...vals)*0.9, mx = Math.max(...vals)*1.05;
+    const sx = i => pad.l + (i/(revenueData.length-1))*cw;
+    const sy = v => pad.t + ch - ((v-mn)/(mx-mn))*ch;
+
+    [0,0.5,1].forEach(t => {
+      const y = pad.t + ch*(1-t);
+      line(svg, pad.l, y, pad.l+cw, y, 'rgba(255,255,255,0.05)');
+      text(svg, pad.l-6, y, Math.round(mn+(mx-mn)*t)+'K', {anchor:'end',base:'middle',size:10});
+    });
+
+    const pts = revenueData.map((d,i)=>[sx(i),sy(d.traffic)]);
+    const areaPts = [[sx(0),pad.t+ch],...pts,[sx(revenueData.length-1),pad.t+ch]];
+    areaPoly(svg, areaPts, 'rgba(124,92,252,0.15)', 'none');
+    polyline(svg, pts, '#7c5cfc', {w:2.5});
+    revenueData.forEach((d,i) => {
+      const cx2=sx(i), cy2=sy(d.traffic);
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',cx2); c.setAttribute('cy',cy2); c.setAttribute('r',3);
+      c.setAttribute('fill','var(--surface)'); c.setAttribute('stroke','#7c5cfc'); c.setAttribute('stroke-width',2);
+      svg.appendChild(c);
+      text(svg, cx2, H-8, d.m, {anchor:'middle',size:10});
+    });
+  });
+}
+
+// Store bar chart
+function buildStoreBar() {
+  svgChart('store-bar-chart', 0, 220, (svg, W, H) => {
+    const pad = {t:16,r:16,b:48,l:16};
+    const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+    const bw = (cw/stores.length)*0.6, gap = cw/stores.length;
+    const mx = Math.max(...stores.map(s=>s.rev))*1.1;
+
+    stores.forEach((s,i) => {
+      const bh = (s.rev/mx)*ch;
+      const x = pad.l + i*gap + (gap-bw)/2;
+      const y = pad.t+ch-bh;
+      const fill = i===0?'#4f7cff':i===1?'#7c5cfc':'rgba(79,124,255,0.4)';
+      rect(svg, x, y, bw, bh, fill, {rx:4});
+      text(svg, x+bw/2, y-4, '$'+s.rev+'K', {anchor:'middle',size:9,fill:'#8b91a8'});
+      const label = s.name.replace('Store ','#');
+      text(svg, x+bw/2, H-8, label, {anchor:'middle',size:9});
+    });
+
+    line(svg, pad.l, pad.t+ch, pad.l+cw, pad.t+ch, 'rgba(255,255,255,0.07)');
+  });
+}
+
+// Store leaderboard
+function buildStoreLeaderboard() {
+  const el = document.getElementById('store-leaderboard');
+  if (!el) return;
+  stores.slice(0,6).forEach((s,i) => {
+    const pct = s.rev/stores[0].rev*100;
+    const colors = ['#4f7cff','#7c5cfc','#22d87a','#06d6b0','#ff9640','#ffd166'];
+    el.innerHTML += `
+      <div class="store-row">
+        <div class="store-rank" style="color:${i<3?colors[i]:'var(--text3)'}">${i+1}</div>
+        <div class="store-info2">
+          <div class="store-name2">${s.name}</div>
+          <div class="store-loc">${s.loc}</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%;background:${colors[i]};"></div></div>
+        </div>
+        <div>
+          <div class="store-rev">$${s.rev}K</div>
+          <div class="store-delta2" style="color:var(--green)">+${(Math.random()*15+5).toFixed(1)}%</div>
+        </div>
+      </div>`;
+  });
+}
+
+// Store traffic
+function buildStoreTraffic() {
+  svgChart('store-traffic-chart', 0, 180, (svg, W, H) => {
+    const pad = {t:16,r:16,b:48,l:16};
+    const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+    const bw = (cw/stores.length)*0.55, gap = cw/stores.length;
+    const mx = Math.max(...stores.map(s=>s.traffic))*1.1;
+
+    stores.forEach((s,i) => {
+      const bh = (s.traffic/mx)*ch;
+      const x = pad.l+i*gap+(gap-bw)/2;
+      const y = pad.t+ch-bh;
+      rect(svg, x, y, bw, bh, i===5?'rgba(255,77,109,0.5)':'rgba(34,216,122,0.5)', {rx:4});
+      text(svg, x+bw/2, y-4, (s.traffic/1000).toFixed(0)+'K', {anchor:'middle',size:9,fill:'#8b91a8'});
+      text(svg, x+bw/2, H-8, s.name.replace('Store ','#'), {anchor:'middle',size:9});
+    });
+  });
+}
+
+// Category bar
+function buildCategoryBar() {
+  svgChart('category-bar-chart', 0, 220, (svg, W, H) => {
+    const pad = {t:16,r:20,b:48,l:16};
+    const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+    const bw = (cw/categories.length)*0.55, gap = cw/categories.length;
+    const mx = Math.max(...categories.map(c=>c.rev))*1.12;
+
+    categories.forEach((c,i) => {
+      const bh = (c.rev/mx)*ch;
+      const x = pad.l+i*gap+(gap-bw)/2;
+      rect(svg, x, pad.t+ch-bh, bw, bh, c.color+'99', {rx:4});
+      rect(svg, x, pad.t+ch-bh, bw, Math.min(4,bh), c.color, {rx:2});
+      text(svg, x+bw/2, pad.t+ch-bh-4, '$'+c.rev+'K', {anchor:'middle',size:9,fill:'#8b91a8'});
+      text(svg, x+bw/2, H-8, c.cat.slice(0,6), {anchor:'middle',size:9});
+    });
+  });
+}
+
+// Category growth
+function buildCategoryGrowth() {
+  svgChart('category-growth-chart', 0, 220, (svg, W, H) => {
+    const pad = {t:16,r:20,b:48,l:36};
+    const sorted = [...categories].sort((a,b)=>b.growth-a.growth);
+    const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+    const bh = (ch/sorted.length)*0.6, gap = ch/sorted.length;
+    const mx = Math.max(...sorted.map(c=>c.growth))*1.15;
+
+    sorted.forEach((c,i) => {
+      const bw2 = (c.growth/mx)*cw;
+      const y = pad.t+i*gap+(gap-bh)/2;
+      rect(svg, pad.l, y, bw2, bh, c.color+'88', {rx:4});
+      rect(svg, pad.l+bw2-4, y, 4, bh, c.color, {rx:2});
+      text(svg, pad.l-4, y+bh/2, c.cat.slice(0,7), {anchor:'end',base:'middle',size:10});
+      text(svg, pad.l+bw2+6, y+bh/2, '+'+c.growth+'%', {anchor:'start',base:'middle',size:10,fill:c.color,weight:'600'});
+    });
+  });
+}
+
+// Top products table
+function buildTopProductsTable() {
+  const el = document.getElementById('top-products-table');
+  if (!el) return;
+  topProducts.forEach((p,i) => {
+    const cat = categories.find(c=>c.cat===p.cat);
+    const color = cat ? cat.color : '#8b91a8';
+    el.innerHTML += `<tr>
+      <td><span class="rank-num ${i<3?'top':''}">${i+1}</span></td>
+      <td style="color:var(--text);font-weight:500">${p.name}</td>
+      <td><span style="background:${color}22;color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">${p.cat}</span></td>
+      <td>${p.units}</td>
+      <td style="color:var(--text);font-weight:600">${p.rev}</td>
+      <td style="color:var(--green);font-weight:600">${p.margin}</td>
+      <td style="color:var(--green);font-weight:600">${p.trend}</td>
+    </tr>`;
+  });
+}
+
+// Inventory turnover
+function buildInventoryChart() {
+  svgChart('inventory-chart', 0, 220, (svg, W, H) => {
+    const pad = {t:16,r:20,b:48,l:16};
+    const sorted = [...inventory].sort((a,b)=>b.turnover-a.turnover);
+    const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+    const bw = (cw/sorted.length)*0.55, gap = cw/sorted.length;
+    const mx = Math.max(...sorted.map(c=>c.turnover))*1.15;
+
+    sorted.forEach((c,i) => {
+      const bh = (c.turnover/mx)*ch;
+      const x = pad.l+i*gap+(gap-bw)/2;
+      rect(svg, x, pad.t+ch-bh, bw, bh, c.color+'77', {rx:4});
+      rect(svg, x, pad.t+ch-bh, bw, Math.min(4,bh), c.color, {rx:2});
+      text(svg, x+bw/2, pad.t+ch-bh-4, c.turnover+'×', {anchor:'middle',size:9,fill:c.color,weight:'700'});
+      text(svg, x+bw/2, H-8, c.cat.slice(0,6), {anchor:'middle',size:9});
+    });
+  });
+}
+
+// Stock status pie
+function buildStockStatus() {
+  const container = document.getElementById('stock-status-chart');
+  if (!container) return;
+  const data = [
+    {label:'Well Stocked',pct:72,color:'#22d87a'},
+    {label:'Low Stock',pct:18,color:'#ffd166'},
+    {label:'Critical',pct:7,color:'#ff9640'},
+    {label:'Out of Stock',pct:3,color:'#ff4d6d'},
+  ];
+  const W = container.clientWidth || 300, H = 160;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width','100%'); svg.setAttribute('height',H);
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const cx=W/2, cy=H/2, r=Math.min(W,H)*0.42, ir=r*0.55;
+  let angle=-Math.PI/2;
+  data.forEach(d => {
+    const sweep=(d.pct/100)*Math.PI*2;
+    const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
+    const x2=cx+r*Math.cos(angle+sweep),y2=cy+r*Math.sin(angle+sweep);
+    const x3=cx+ir*Math.cos(angle+sweep),y3=cy+ir*Math.sin(angle+sweep);
+    const x4=cx+ir*Math.cos(angle),y4=cy+ir*Math.sin(angle);
+    const lg=sweep>Math.PI?1:0;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${x1},${y1} A${r},${r} 0 ${lg} 1 ${x2},${y2} L${x3},${y3} A${ir},${ir} 0 ${lg} 0 ${x4},${y4} Z`);
+    path.setAttribute('fill',d.color); path.setAttribute('stroke','var(--surface)'); path.setAttribute('stroke-width','2');
+    svg.appendChild(path);
+    angle+=sweep;
+  });
+  const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x',cx);t.setAttribute('y',cy+6);t.setAttribute('text-anchor','middle');
+  t.setAttribute('fill','#fff');t.setAttribute('font-size','20');t.setAttribute('font-weight','700');
+  t.setAttribute('font-family',"'DM Serif Display',serif");t.textContent='97.9%';
+  svg.appendChild(t);
+  container.appendChild(svg);
+  const legend=document.getElementById('stock-legend');
+  data.forEach(d=>{
+    const item=document.createElement('div');
+    item.className='legend-item';
+    item.innerHTML=`<div class="legend-dot" style="background:${d.color}"></div>${d.label} (${d.pct}%)`;
+    legend.appendChild(item);
+  });
+}
+
+// Supplier chart
+function buildSupplierChart() {
+  svgChart('supplier-chart', 0, 200, (svg, W, H) => {
+    const pad = {t:16,r:16,b:36,l:16};
+    const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+    const bh = (ch/suppliers.length)*0.35, gap = ch/suppliers.length;
+    suppliers.forEach((s,i) => {
+      const y = pad.t+i*gap;
+      const fw = (s.fill/100)*cw;
+      const otw = (s.onTime/100)*cw;
+      text(svg, pad.l, y+bh/2, s.name, {base:'middle',size:11,fill:'#8b91a8'});
+      rect(svg, pad.l+70, y, fw-70, bh, '#4f7cff55', {rx:3});
+      rect(svg, pad.l+70, y+bh+3, otw-70, bh, '#22d87a55', {rx:3});
+      text(svg, pad.l+70+fw-65, y+bh/2, s.fill+'%', {anchor:'end',base:'middle',size:10,fill:'#4f7cff',weight:'700'});
+      text(svg, pad.l+70+otw-65, y+bh+3+bh/2, s.onTime+'%', {anchor:'end',base:'middle',size:10,fill:'#22d87a',weight:'700'});
+    });
+    // Legend
+    text(svg, pad.l+70, H-8, '■ Fill Rate', {size:10,fill:'#4f7cff'});
+    text(svg, pad.l+140, H-8, '■ On-Time', {size:10,fill:'#22d87a'});
+  });
+}
+
+// Heatmap
+function buildHeatmap() {
+  const container = document.getElementById('heatmap-container');
+  if (!container) return;
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const hours = ['8AM','10AM','12PM','2PM','4PM','6PM','8PM'];
+  const data = hours.map(h => days.map(d => {
+    const isWeekend = d==='Sat'||d==='Sun';
+    const isPeak = h==='5PM'||h==='6PM'||h==='12PM';
+    return Math.floor(Math.random()*(isWeekend?80:60)+(isPeak?30:10));
+  }));
+
+  const grid = document.createElement('div');
+  grid.className = 'heatmap';
+  grid.style.gridTemplateColumns = '44px repeat(7,1fr)';
+  grid.style.gap = '3px';
+
+  // Header row
+  const empty = document.createElement('div');
+  grid.appendChild(empty);
+  days.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'heatmap-header';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  hours.forEach((h,i) => {
+    const label = document.createElement('div');
+    label.className = 'heatmap-label';
+    label.textContent = h;
+    grid.appendChild(label);
+    days.forEach((_,j) => {
+      const val = data[i][j];
+      const intensity = val/100;
+      const cell = document.createElement('div');
+      cell.className = 'heatmap-cell';
+      cell.style.background = `rgba(79,124,255,${0.05+intensity*0.8})`;
+      cell.style.color = intensity>0.5?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.4)';
+      cell.textContent = val;
+      grid.appendChild(cell);
+    });
+  });
+  container.appendChild(grid);
+}
+
+// Segment pie
+function buildSegmentPie() {
+  const container = document.getElementById('segment-pie-chart');
+  if (!container) return;
+  const segs = [
+    {label:'Loyalty Members',pct:38,color:'#4f7cff'},
+    {label:'Regular Shoppers',pct:30,color:'#22d87a'},
+    {label:'Occasional Buyers',pct:20,color:'#ffd166'},
+    {label:'First-Time Visitors',pct:12,color:'#7c5cfc'},
+  ];
+  const W = container.clientWidth||300, H=160;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width','100%'); svg.setAttribute('height',H);
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const cx=W/2, cy=H/2, r=Math.min(W,H)*0.42, ir=r*0.55;
+  let angle=-Math.PI/2;
+  segs.forEach(s=>{
+    const sweep=(s.pct/100)*Math.PI*2;
+    const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
+    const x2=cx+r*Math.cos(angle+sweep),y2=cy+r*Math.sin(angle+sweep);
+    const x3=cx+ir*Math.cos(angle+sweep),y3=cy+ir*Math.sin(angle+sweep);
+    const x4=cx+ir*Math.cos(angle),y4=cy+ir*Math.sin(angle);
+    const lg=sweep>Math.PI?1:0;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${x1},${y1} A${r},${r} 0 ${lg} 1 ${x2},${y2} L${x3},${y3} A${ir},${ir} 0 ${lg} 0 ${x4},${y4} Z`);
+    path.setAttribute('fill',s.color); path.setAttribute('stroke','var(--surface)'); path.setAttribute('stroke-width','2');
+    svg.appendChild(path);
+    angle+=sweep;
+  });
+  container.appendChild(svg);
+  const legend=document.getElementById('segment-legend');
+  segs.forEach(s=>{
+    const item=document.createElement('div');
+    item.className='legend-item';
+    item.innerHTML=`<div class="legend-dot" style="background:${s.color}"></div>${s.label} (${s.pct}%)`;
+    legend.appendChild(item);
+  });
+}
+
+// Basket chart
+function buildBasketChart() {
+  svgChart('basket-chart', 0, 200, (svg, W, H) => {
+    const data = [
+      {range:'$0–10',count:8},{range:'$10–20',count:22},{range:'$20–30',count:31},
+      {range:'$30–40',count:24},{range:'$40–50',count:10},{range:'$50+',count:5},
+    ];
+    const pad = {t:16,r:16,b:40,l:36};
+    const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+    const bw = (cw/data.length)*0.6, gap = cw/data.length;
+    const mx = Math.max(...data.map(d=>d.count))*1.12;
+    data.forEach((d,i)=>{
+      const bh=(d.count/mx)*ch;
+      const x=pad.l+i*gap+(gap-bw)/2;
+      rect(svg, x, pad.t+ch-bh, bw, bh, i===2?'#4f7cff':'rgba(79,124,255,0.4)', {rx:4});
+      text(svg, x+bw/2, pad.t+ch-bh-4, d.count+'%', {anchor:'middle',size:9,fill:'#8b91a8'});
+      text(svg, x+bw/2, H-8, d.range, {anchor:'middle',size:9});
+    });
+    [0,0.5,1].forEach(t=>{
+      const y=pad.t+ch*(1-t);
+      line(svg, pad.l, y, pad.l+cw, y, 'rgba(255,255,255,0.04)');
+      text(svg, pad.l-4, y, Math.round(mx*t)+'%', {anchor:'end',base:'middle',size:9});
+    });
+  });
+}
+
+// Campaign grid
+function buildCampaignGrid() {
+  const el = document.getElementById('campaign-grid');
+  if (!el) return;
+  campaigns.forEach(c=>{
+    const roiNum = parseFloat(c.roi);
+    const roiColor = roiNum>=4?'#22d87a':roiNum>=3?'#ffd166':'#ff9640';
+    el.innerHTML += `<div class="campaign-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div><div class="campaign-name">${c.name}</div><div class="campaign-type">${c.type}</div></div>
+        <span style="background:${c.color}22;color:${c.color};font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px">${c.roi} ROI</span>
+      </div>
+      <div class="campaign-metrics">
+        <div><div class="campaign-metric-label">Revenue Lift</div><div class="campaign-metric-value" style="color:${c.color}">${c.lift}</div></div>
+        <div><div class="campaign-metric-label">Redemption</div><div class="campaign-metric-value">${c.redemption}</div></div>
+        <div><div class="campaign-metric-label">Conversions</div><div class="campaign-metric-value">${c.conversions}</div></div>
+        <div><div class="campaign-metric-label">Status</div><div class="campaign-metric-value" style="color:var(--green);font-size:13px">● Active</div></div>
+      </div>
+    </div>`;
+  });
+}
+
+// Channel pie
+function buildChannelChart() {
+  const container = document.getElementById('channel-chart');
+  if (!container) return;
+  const data = [
+    {label:'In-Store Promo',pct:38,color:'#4f7cff'},
+    {label:'Email Campaign',pct:28,color:'#22d87a'},
+    {label:'Social Media',pct:18,color:'#7c5cfc'},
+    {label:'SMS / Push',pct:10,color:'#ffd166'},
+    {label:'Direct Mail',pct:6,color:'#ff9640'},
+  ];
+  const W=container.clientWidth||300, H=160;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width','100%'); svg.setAttribute('height',H);
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const cx=W/2, cy=H/2, r=Math.min(W,H)*0.42, ir=r*0.55;
+  let angle=-Math.PI/2;
+  data.forEach(d=>{
+    const sweep=(d.pct/100)*Math.PI*2;
+    const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
+    const x2=cx+r*Math.cos(angle+sweep),y2=cy+r*Math.sin(angle+sweep);
+    const x3=cx+ir*Math.cos(angle+sweep),y3=cy+ir*Math.sin(angle+sweep);
+    const x4=cx+ir*Math.cos(angle),y4=cy+ir*Math.sin(angle);
+    const lg=sweep>Math.PI?1:0;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${x1},${y1} A${r},${r} 0 ${lg} 1 ${x2},${y2} L${x3},${y3} A${ir},${ir} 0 ${lg} 0 ${x4},${y4} Z`);
+    path.setAttribute('fill',d.color); path.setAttribute('stroke','var(--surface)'); path.setAttribute('stroke-width','2');
+    svg.appendChild(path);
+    angle+=sweep;
+  });
+  container.appendChild(svg);
+  const legend=document.getElementById('channel-legend');
+  data.forEach(d=>{
+    const item=document.createElement('div');
+    item.className='legend-item';
+    item.innerHTML=`<div class="legend-dot" style="background:${d.color}"></div>${d.label} (${d.pct}%)`;
+    legend.appendChild(item);
+  });
+}
+
+// Lift chart
+function buildLiftChart() {
+  svgChart('lift-chart', 0, 200, (svg, W, H) => {
+    const weeks = ['Wk1','Wk2','Wk3','Wk4','Wk5','Wk6','Wk7','Wk8'];
+    const baseline = [140,138,142,139,141,143,140,142];
+    const lifted = [140,138,165,172,168,178,182,190];
+    const pad = {t:20,r:20,b:36,l:40};
+    const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+    const mn = 120, mx = 210;
+    const sx = i => pad.l+(i/(weeks.length-1))*cw;
+    const sy = v => pad.t+ch-((v-mn)/(mx-mn))*ch;
+
+    [0,0.5,1].forEach(t=>{
+      const y=pad.t+ch*(1-t);
+      line(svg,pad.l,y,pad.l+cw,y,'rgba(255,255,255,0.05)');
+      text(svg,pad.l-4,y,'$'+(mn+(mx-mn)*t).toFixed(0)+'K',{anchor:'end',base:'middle',size:9});
+    });
+
+    const bPts=baseline.map((v,i)=>[sx(i),sy(v)]);
+    const lPts=lifted.map((v,i)=>[sx(i),sy(v)]);
+    polyline(svg, bPts, 'rgba(255,255,255,0.25)', {w:1.5});
+    polyline(svg, lPts, '#22d87a', {w:2.5});
+
+    weeks.forEach((w,i)=>{
+      text(svg,sx(i),H-8,w,{anchor:'middle',size:9});
+      const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',sx(i)); c.setAttribute('cy',sy(lifted[i])); c.setAttribute('r',3);
+      c.setAttribute('fill','var(--surface)'); c.setAttribute('stroke','#22d87a'); c.setAttribute('stroke-width',2);
+      svg.appendChild(c);
+    });
+  });
+
+  // HTML legend
+  const liftLegend = document.createElement('div');
+  liftLegend.className = 'custom-legend';
+  liftLegend.style.marginTop = '8px';
+  liftLegend.innerHTML = `
+    <div class="legend-item"><span style="display:inline-block;width:24px;height:3px;background:#22d87a;border-radius:2px;margin-right:6px;vertical-align:middle"></span>With Campaigns</div>
+    <div class="legend-item"><span style="display:inline-block;width:24px;height:3px;background:rgba(255,255,255,0.3);border-radius:2px;margin-right:6px;vertical-align:middle"></span>Baseline</div>
+  `;
+  const liftContainer = document.getElementById('lift-chart');
+  if (liftContainer) liftContainer.appendChild(liftLegend);
+}
+
+// Sentiment trend
+function buildSentimentTrend() {
+  const container = document.getElementById('sentiment-trend-chart');
+  if (!container) return;
+
+  // Build SVG chart (no legend inside)
+  svgChart('sentiment-trend-chart', 0, 190, (svg, W, H) => {
+    const pad = {t:16,r:20,b:36,l:40};
+    const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+    const sx = i => pad.l+(i/(sentimentData.length-1))*cw;
+    const sy = v => pad.t+ch-(v/100)*ch;
+
+    [0,0.25,0.5,0.75,1].forEach(t=>{
+      const y=pad.t+ch*(1-t);
+      line(svg,pad.l,y,pad.l+cw,y,'rgba(255,255,255,0.05)');
+      text(svg,pad.l-4,y,(t*100).toFixed(0)+'%',{anchor:'end',base:'middle',size:9});
+    });
+
+    const pospts=sentimentData.map((d,i)=>[sx(i),sy(d.pos)]);
+    const negpts=sentimentData.map((d,i)=>[sx(i),sy(d.neg)]);
+    const neupts=sentimentData.map((d,i)=>[sx(i),sy(d.neu)]);
+
+    // Area fill for positive
+    const posArea=[[sx(0),pad.t+ch],...pospts,[sx(sentimentData.length-1),pad.t+ch]];
+    areaPoly(svg, posArea, 'rgba(34,216,122,0.08)', 'none');
+
+    polyline(svg,neupts,'rgba(255,209,102,0.6)',{w:1.5});
+    polyline(svg,negpts,'#ff4d6d',{w:2});
+    polyline(svg,pospts,'#22d87a',{w:2.5});
+
+    sentimentData.forEach((d,i)=>{
+      const makeDot=(pts,color,r2)=>{
+        const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        c.setAttribute('cx',pts[i][0]); c.setAttribute('cy',pts[i][1]); c.setAttribute('r',r2||3);
+        c.setAttribute('fill','var(--surface)'); c.setAttribute('stroke',color); c.setAttribute('stroke-width',2);
+        svg.appendChild(c);
+      };
+      makeDot(pospts,'#22d87a',3.5);
+      makeDot(negpts,'#ff4d6d');
+      text(svg,sx(i),H-8,d.m,{anchor:'middle',size:10});
+    });
+  });
+
+  // HTML legend below chart
+  const legend = document.createElement('div');
+  legend.className = 'custom-legend';
+  legend.style.marginTop = '10px';
+  legend.innerHTML = `
+    <div class="legend-item"><span style="display:inline-block;width:24px;height:3px;background:#22d87a;border-radius:2px;margin-right:6px;vertical-align:middle"></span>Positive</div>
+    <div class="legend-item"><span style="display:inline-block;width:24px;height:3px;background:#ffd166;border-radius:2px;margin-right:6px;vertical-align:middle"></span>Neutral</div>
+    <div class="legend-item"><span style="display:inline-block;width:24px;height:3px;background:#ff4d6d;border-radius:2px;margin-right:6px;vertical-align:middle"></span>Negative</div>
+  `;
+  container.appendChild(legend);
+}
+
+// Review distribution
+function buildReviewDist() {
+  const el = document.getElementById('review-dist');
+  if (!el) return;
+  const reviews = [
+    {stars:5,pct:58},{stars:4,pct:26},{stars:3,pct:9},{stars:2,pct:4},{stars:1,pct:3}
+  ];
+  el.innerHTML = '<div class="review-dist" style="margin-top:12px">' + reviews.map(r=>`
+    <div class="review-row">
+      <div style="font-size:12px;font-weight:700;color:var(--text3);width:12px">${r.stars}</div>
+      <div class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+      <div class="review-bar"><div class="review-bar-fill" style="width:${r.pct}%"></div></div>
+      <div class="review-pct">${r.pct}%</div>
+    </div>`).join('') + '</div>';
+  // Avg rating display
+  el.innerHTML += `<div style="margin-top:20px;text-align:center">
+    <div style="font-family:var(--font-heading);font-size:48px;color:#fff;line-height:1">4.4</div>
+    <div style="color:var(--yellow);font-size:20px;margin:4px 0">★★★★☆</div>
+    <div style="font-size:12px;color:var(--text3)">Based on 1,200 reviews</div>
+  </div>`;
+}
+
+// Complaint chart
+function buildComplaintChart() {
+  svgChart('complaint-chart', 0, 200, (svg, W, H) => {
+    const pad={t:16,r:80,b:16,l:16};
+    const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+    const bh=(ch/complaints.length)*0.55, gap=ch/complaints.length;
+    const mx=Math.max(...complaints.map(c=>c.pct))*1.15;
+
+    complaints.forEach((c,i)=>{
+      const bw2=(c.pct/mx)*cw;
+      const y=pad.t+i*gap+(gap-bh)/2;
+      rect(svg,pad.l,y,bw2,bh,c.color+'55',{rx:4});
+      rect(svg,pad.l+bw2-4,y,4,bh,c.color,{rx:2});
+      text(svg,pad.l-4,y+bh/2,c.cat,{anchor:'end',base:'middle',size:10});
+      text(svg,pad.l+bw2+8,y+bh/2,c.pct+'%',{anchor:'start',base:'middle',size:11,fill:c.color,weight:'700'});
+    });
+  });
+}
+
+// ── SOCIAL LISTENING CHARTS ───────────────────────────────────────────────────
+
+// Platform breakdown horizontal bars
+function buildSocialPlatformChart() {
+  const el = document.getElementById('social-platform-chart');
+  if (!el) return;
+  const platforms = [
+    {name:'Instagram',mentions:5240,pos:78,neu:14,neg:8,color:'#E1306C'},
+    {name:'Facebook',mentions:4180,pos:71,neu:19,neg:10,color:'#1877F2'},
+    {name:'Google Reviews',mentions:2640,pos:84,neu:10,neg:6,color:'#4285F4'},
+    {name:'TikTok',mentions:1420,pos:82,neu:12,neg:6,color:'#ff2d55'},
+    {name:'X / Twitter',mentions:860,pos:62,neu:22,neg:16,color:'#1DA1F2'},
+    {name:'Yelp',mentions:480,pos:69,neu:16,neg:15,color:'#ff6600'},
+  ];
+  const maxM = Math.max(...platforms.map(p=>p.mentions));
+  el.innerHTML = `
+    <div style="display:flex;gap:8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+      <div style="width:110px;flex-shrink:0">Platform</div>
+      <div style="flex:1">
+        <div style="margin-bottom:3px">Sentiment breakdown</div>
+        <div>Mention volume (relative to top platform)</div>
+      </div>
+      <div style="width:60px;text-align:right;flex-shrink:0">Mentions</div>
+    </div>` +
+  platforms.map(p => {
+    const pct = (p.mentions/maxM*100).toFixed(0);
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="width:110px;font-size:12px;font-weight:600;color:var(--text);flex-shrink:0">${p.name}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:1px;margin-bottom:6px">
+          <div style="width:${p.pos}%;background:#22d87a;border-radius:2px 0 0 2px"></div>
+          <div style="width:${p.neu}%;background:#ffd166"></div>
+          <div style="width:${p.neg}%;background:#ff4d6d;border-radius:0 2px 2px 0"></div>
+        </div>
+        <div style="background:var(--surface3);border-radius:3px;height:4px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${p.color};border-radius:3px"></div>
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;width:60px">
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${p.mentions.toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--green)">${p.pos}% pos</div>
+      </div>
+    </div>`;
+  }).join('') + `<div class="custom-legend" style="margin-top:14px;flex-wrap:wrap;row-gap:8px">
+    <div style="width:100%;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:2px">Sentiment bar</div>
+    <div class="legend-item"><span style="display:inline-block;width:12px;height:8px;background:#22d87a;border-radius:2px;margin-right:6px"></span>Positive</div>
+    <div class="legend-item"><span style="display:inline-block;width:12px;height:8px;background:#ffd166;border-radius:2px;margin-right:6px"></span>Neutral</div>
+    <div class="legend-item"><span style="display:inline-block;width:12px;height:8px;background:#ff4d6d;border-radius:2px;margin-right:6px"></span>Negative</div>
+    <div style="width:100%;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-top:6px;margin-bottom:2px">Volume bar</div>
+    <div class="legend-item"><span style="display:inline-block;width:12px;height:4px;background:linear-gradient(90deg,#4f7cff,#1877F2);border-radius:2px;margin-right:6px"></span>Platform-colored bar = relative mention volume (% of highest platform)</div>
+  </div>`;
+}
+
+// Competitor SOV donut
+function buildSOVChart() {
+  const container = document.getElementById('comp-sov-chart');
+  if (!container) return;
+  const data = [
+    {label:'ShopRight',pct:38.4,color:'#4f7cff'},
+    {label:'FreshMart',pct:26.1,color:'#ff4d6d'},
+    {label:'Island Grocers',pct:18.8,color:'#ffd166'},
+    {label:'Cost-U-Less',pct:12.2,color:'#7c5cfc'},
+    {label:'Others',pct:4.5,color:'#5a6177'},
+  ];
+  const W=container.clientWidth||280, H=160;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width','100%'); svg.setAttribute('height',H);
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const cx=W/2, cy=H/2, r=Math.min(W,H)*0.42, ir=r*0.55;
+  let angle=-Math.PI/2;
+  data.forEach(d=>{
+    const sweep=(d.pct/100)*Math.PI*2;
+    const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
+    const x2=cx+r*Math.cos(angle+sweep),y2=cy+r*Math.sin(angle+sweep);
+    const x3=cx+ir*Math.cos(angle+sweep),y3=cy+ir*Math.sin(angle+sweep);
+    const x4=cx+ir*Math.cos(angle),y4=cy+ir*Math.sin(angle);
+    const lg=sweep>Math.PI?1:0;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${x1},${y1} A${r},${r} 0 ${lg} 1 ${x2},${y2} L${x3},${y3} A${ir},${ir} 0 ${lg} 0 ${x4},${y4} Z`);
+    path.setAttribute('fill',d.color); path.setAttribute('stroke','var(--surface)'); path.setAttribute('stroke-width','2');
+    svg.appendChild(path);
+    angle+=sweep;
+  });
+  const t1=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t1.setAttribute('x',cx); t1.setAttribute('y',cy-4); t1.setAttribute('text-anchor','middle');
+  t1.setAttribute('fill','#fff'); t1.setAttribute('font-size','20'); t1.setAttribute('font-weight','700');
+  t1.setAttribute('font-family',"'DM Serif Display',serif"); t1.textContent='#1';
+  const t2=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t2.setAttribute('x',cx); t2.setAttribute('y',cy+14); t2.setAttribute('text-anchor','middle');
+  t2.setAttribute('fill','#4f7cff'); t2.setAttribute('font-size','10'); t2.setAttribute('font-weight','700'); t2.textContent='Share of Voice';
+  svg.appendChild(t1); svg.appendChild(t2);
+  container.appendChild(svg);
+  const legend=document.getElementById('sov-legend');
+  data.forEach(d=>{
+    const item=document.createElement('div');
+    item.className='legend-item';
+    item.innerHTML=`<div class="legend-dot" style="background:${d.color}"></div>${d.label} (${d.pct}%)`;
+    legend.appendChild(item);
+  });
+}
+
+// Mention trend line chart
+function buildMentionTrend() {
+  const weeks=['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'];
+  const shopright=[820,880,940,910,1020,1180,1140,1240,1300,1420,1480,1620];
+  const competitor=[940,920,880,860,790,810,780,800,760,740,720,700];
+
+  svgChart('mention-trend-chart', 0, 190, (svg, W, H)=>{
+    const pad={t:16,r:20,b:36,l:52};
+    const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+    const mn=500, mx=1800;
+    const sx=i=>pad.l+(i/(weeks.length-1))*cw;
+    const sy=v=>pad.t+ch-((v-mn)/(mx-mn))*ch;
+
+    [500,1000,1500].forEach(v=>{
+      const y=sy(v);
+      line(svg,pad.l,y,pad.l+cw,y,'rgba(255,255,255,0.05)');
+      text(svg,pad.l-4,y,v.toLocaleString(),{anchor:'end',base:'middle',size:9});
+    });
+
+    const sPts=shopright.map((v,i)=>[sx(i),sy(v)]);
+    const cPts=competitor.map((v,i)=>[sx(i),sy(v)]);
+    const sArea=[[sx(0),pad.t+ch],...sPts,[sx(weeks.length-1),pad.t+ch]];
+    areaPoly(svg,sArea,'rgba(79,124,255,0.1)','none');
+    polyline(svg,cPts,'rgba(255,77,109,0.7)',{w:2});
+    polyline(svg,sPts,'#4f7cff',{w:2.5});
+
+    weeks.forEach((w,i)=>{
+      if(i%2===0) text(svg,sx(i),H-8,w,{anchor:'middle',size:9});
+      const dot=(pts,color)=>{
+        const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        c.setAttribute('cx',pts[i][0]); c.setAttribute('cy',pts[i][1]); c.setAttribute('r',3);
+        c.setAttribute('fill','var(--surface)'); c.setAttribute('stroke',color); c.setAttribute('stroke-width',2);
+        svg.appendChild(c);
+      };
+      dot(sPts,'#4f7cff'); dot(cPts,'#ff4d6d');
+    });
+  });
+
+  const legend=document.getElementById('mention-legend');
+  if(legend) legend.innerHTML=`
+    <div class="legend-item"><span style="display:inline-block;width:24px;height:3px;background:#4f7cff;border-radius:2px;margin-right:6px;vertical-align:middle"></span>ShopRight</div>
+    <div class="legend-item"><span style="display:inline-block;width:24px;height:3px;background:#ff4d6d;border-radius:2px;margin-right:6px;vertical-align:middle"></span>FreshMart (Top Competitor)</div>
+  `;
+}
+
+// Topic bubbles
+function buildTopicBubbles() {
+  const el = document.getElementById('topic-bubbles');
+  if (!el) return;
+  const topics = [
+    {label:'Fresh Produce',count:2840,sentiment:'pos',size:1.0},
+    {label:'Great Prices',count:2210,sentiment:'pos',size:0.88},
+    {label:'Clean Stores',count:1680,sentiment:'pos',size:0.76},
+    {label:'Loyalty Rewards',count:1420,sentiment:'pos',size:0.70},
+    {label:'Long Queues',count:980,sentiment:'neg',size:0.60},
+    {label:'Friendly Staff',count:1240,sentiment:'pos',size:0.66},
+    {label:'Local Products',count:860,sentiment:'pos',size:0.56},
+    {label:'Parking Issues',count:640,sentiment:'neg',size:0.50},
+    {label:'Good Bakery',count:780,sentiment:'pos',size:0.54},
+    {label:'Online App',count:520,sentiment:'neu',size:0.46},
+  ];
+  el.style.display='flex'; el.style.flexWrap='wrap'; el.style.gap='8px'; el.style.padding='8px 0'; el.style.alignItems='center';
+  topics.forEach(t=>{
+    const color = t.sentiment==='pos'?'rgba(34,216,122,0.15)':t.sentiment==='neg'?'rgba(255,77,109,0.15)':'rgba(255,209,102,0.12)';
+    const borderColor = t.sentiment==='pos'?'rgba(34,216,122,0.35)':t.sentiment==='neg'?'rgba(255,77,109,0.35)':'rgba(255,209,102,0.3)';
+    const textColor = t.sentiment==='pos'?'#22d87a':t.sentiment==='neg'?'#ff4d6d':'#ffd166';
+    const fontSize = Math.round(11+t.size*4);
+    const pad2 = Math.round(6+t.size*4);
+    el.innerHTML += `<div style="background:${color};border:1px solid ${borderColor};border-radius:20px;padding:${pad2/2}px ${pad2+2}px;font-size:${fontSize}px;font-weight:600;color:${textColor};cursor:default;transition:transform 0.15s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      ${t.label}
+      <span style="font-size:${fontSize-2}px;opacity:0.7;margin-left:4px">${(t.count/1000).toFixed(1)}K</span>
+    </div>`;
+  });
+}
+
+// Location sentiment grid
+function buildLocationSentimentGrid() {
+  const el = document.getElementById('location-sentiment-grid');
+  if (!el) return;
+  const locations = [
+    {name:'Store #4',loc:'Downtown',score:4.8,pos:88,neg:4,trend:'up',mentions:1840},
+    {name:'Store #7',loc:'Suburban West',score:4.6,pos:84,neg:6,trend:'up',mentions:1420},
+    {name:'Store #1',loc:'Midtown',score:4.4,pos:81,neg:8,trend:'stable',mentions:1280},
+    {name:'Store #9',loc:'North Quarter',score:4.5,pos:83,neg:7,trend:'up',mentions:1140},
+    {name:'Store #2',loc:'East Side',score:4.3,pos:79,neg:9,trend:'stable',mentions:980},
+    {name:'Store #3',loc:'Airport District',score:4.4,pos:80,neg:8,trend:'up',mentions:860},
+    {name:'Store #6',loc:'Riverside',score:4.2,pos:76,neg:11,trend:'down',mentions:740},
+    {name:'Store #8',loc:'South Bay',score:4.1,pos:74,neg:13,trend:'down',mentions:680},
+    {name:'Store #10',loc:'Central Market',score:4.3,pos:78,neg:10,trend:'stable',mentions:620},
+    {name:'Store #5',loc:'Harbor View',score:4.0,pos:71,neg:14,trend:'down',mentions:580},
+    {name:'Store #11',loc:'Westfield Mall',score:3.6,pos:62,neg:22,trend:'down',mentions:1240},
+    {name:'Store #12',loc:'East End',score:4.2,pos:77,neg:12,trend:'stable',mentions:420},
+  ];
+  el.style.display='grid'; el.style.gridTemplateColumns='repeat(4,1fr)'; el.style.gap='10px'; el.style.marginTop='8px';
+  locations.forEach(loc=>{
+    const scoreColor = loc.score>=4.5?'#22d87a':loc.score>=4.0?'#4f7cff':loc.score>=3.8?'#ffd166':'#ff4d6d';
+    const trendIcon = loc.trend==='up'?'↑':loc.trend==='down'?'↓':'→';
+    const trendColor = loc.trend==='up'?'#22d87a':loc.trend==='down'?'#ff4d6d':'#8b91a8';
+    const sentBar = `<div style="display:flex;height:5px;border-radius:3px;overflow:hidden;gap:1px;margin-top:6px">
+      <div style="width:${loc.pos}%;background:#22d87a;border-radius:2px 0 0 2px"></div>
+      <div style="width:${100-loc.pos-loc.neg}%;background:#ffd16688"></div>
+      <div style="width:${loc.neg}%;background:#ff4d6d;border-radius:0 2px 2px 0"></div>
+    </div>`;
+    el.innerHTML += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text)">${loc.name}</div>
+          <div style="font-size:10px;color:var(--text3)">${loc.loc}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:18px;font-weight:800;color:${scoreColor};font-family:var(--font-heading)">${loc.score}</div>
+          <div style="font-size:11px;color:${trendColor};font-weight:700">${trendIcon} ${loc.trend}</div>
+        </div>
+      </div>
+      ${sentBar}
+      <div style="display:flex;justify-content:space-between;margin-top:5px">
+        <span style="font-size:10px;color:#22d87a">${loc.pos}% pos</span>
+        <span style="font-size:10px;color:var(--text3)">${loc.mentions.toLocaleString()} mentions</span>
+      </div>
+    </div>`;
+  });
+}
+
+// Competitor table
+function buildCompetitorTable() {
+  const el = document.getElementById('competitor-table');
+  if (!el) return;
+  const competitors = [
+    {name:'FreshMart',sentiment:'Declining',topics:'Wait times, pricing complaints',mentions:'8,420',vs:'+47% ahead',vsColor:'#22d87a'},
+    {name:'Island Grocers',sentiment:'Stable',topics:'Local produce, loyalty program',mentions:'6,180',vs:'+104% ahead',vsColor:'#22d87a'},
+    {name:'Cost-U-Less',sentiment:'Mixed',topics:'Bulk deals, limited range',mentions:'3,940',vs:'+276% ahead',vsColor:'#4f7cff'},
+    {name:'Fosters Food Fair',sentiment:'Positive',topics:'Premium items, service',mentions:'2,810',vs:'+427% ahead',vsColor:'#4f7cff'},
+  ];
+  const sentColors = {Declining:'#ff4d6d',Stable:'#ffd166',Mixed:'#ff9640',Positive:'#22d87a'};
+  competitors.forEach(c=>{
+    el.innerHTML += `<tr>
+      <td style="font-weight:600;color:var(--text)">${c.name}</td>
+      <td><span style="background:${sentColors[c.sentiment]}22;color:${sentColors[c.sentiment]};font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px">${c.sentiment}</span></td>
+      <td style="font-size:12px">${c.topics}</td>
+      <td style="font-weight:600;color:var(--text)">${c.mentions}</td>
+      <td style="font-weight:700;color:${c.vsColor};font-size:12px">${c.vs}</td>
+    </tr>`;
+  });
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+const titles = {
+  overview:'Executive Retail Overview',
+  stores:'Store Performance Analytics',
+  categories:'Product Category Intelligence',
+  inventory:'Inventory & Supply Chain Intelligence',
+  customers:'Customer Behavior & Shopping Patterns',
+  marketing:'Promotions & Marketing Performance',
+  sentiment:'Customer Feedback & Brand Sentiment',
+  social:'Social Listening & Competitive Intelligence',
+};
+
+function showModule(id, navEl) {
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('mod-'+id).classList.add('active');
+  navEl.classList.add('active');
+  document.getElementById('page-title').textContent = titles[id];
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  buildRevenueTrend();
+  buildCategoryPie();
+  buildTrafficChart();
+  buildStoreBar();
+  buildStoreLeaderboard();
+  buildStoreTraffic();
+  buildCategoryBar();
+  buildCategoryGrowth();
+  buildTopProductsTable();
+  buildInventoryChart();
+  buildStockStatus();
+  buildSupplierChart();
+  buildHeatmap();
+  buildSegmentPie();
+  buildBasketChart();
+  buildCampaignGrid();
+  buildChannelChart();
+  buildLiftChart();
+  buildSentimentTrend();
+  buildReviewDist();
+  buildComplaintChart();
+  // Social Listening
+  buildSocialPlatformChart();
+  buildSOVChart();
+  buildMentionTrend();
+  buildTopicBubbles();
+  buildLocationSentimentGrid();
+  buildCompetitorTable();
+});
+</script>
+</body>
+</html>
