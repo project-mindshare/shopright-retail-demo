@@ -721,10 +721,10 @@ svg text { font-family: var(--font-body) !important; }
         </div>
 
         <!-- Platform breakdown + Competitor share -->
-        <div class="chart-grid">
+        <div class="chart-grid-2">
           <div class="chart-card">
             <div class="chart-header">
-              <div><div class="chart-title">Mentions by Platform</div><div class="chart-subtitle">Volume and sentiment per channel · MTD</div></div>
+              <div><div class="chart-title">Mentions by Platform</div><div class="chart-subtitle">Sentiment breakdown and volume per channel · MTD</div></div>
               <span class="chart-badge blue">6 Platforms</span>
             </div>
             <div id="social-platform-chart"></div>
@@ -732,9 +732,9 @@ svg text { font-family: var(--font-body) !important; }
           <div class="chart-card">
             <div class="chart-header">
               <div><div class="chart-title">Competitive Share of Voice</div><div class="chart-subtitle">Online presence vs. key competitors</div></div>
+              <span class="chart-badge blue">#1 in Market</span>
             </div>
             <div id="comp-sov-chart"></div>
-            <div class="custom-legend" id="sov-legend"></div>
           </div>
         </div>
 
@@ -1594,90 +1594,100 @@ function buildSocialPlatformChart() {
     {name:'Yelp',mentions:480,pos:69,neu:16,neg:15,color:'#ff6600'},
   ];
   const maxM = Math.max(...platforms.map(p=>p.mentions));
-  el.innerHTML = `
-    <div style="display:flex;gap:8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
-      <div style="width:110px;flex-shrink:0">Platform</div>
-      <div style="flex:1">
-        <div style="margin-bottom:3px">Sentiment breakdown</div>
-        <div>Mention volume (relative to top platform)</div>
-      </div>
-      <div style="width:60px;text-align:right;flex-shrink:0">Mentions</div>
-    </div>` +
-  platforms.map(p => {
+  el.innerHTML = platforms.map(p => {
     const pct = (p.mentions/maxM*100).toFixed(0);
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-      <div style="width:110px;font-size:12px;font-weight:600;color:var(--text);flex-shrink:0">${p.name}</div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:1px;margin-bottom:6px">
-          <div style="width:${p.pos}%;background:#22d87a;border-radius:2px 0 0 2px"></div>
-          <div style="width:${p.neu}%;background:#ffd166"></div>
-          <div style="width:${p.neg}%;background:#ff4d6d;border-radius:0 2px 2px 0"></div>
+    return `<div style="display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)">
+      <div style="width:108px;font-size:13px;font-weight:600;color:var(--text);flex-shrink:0">${p.name}</div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:1px">
+          <div style="width:${p.pos}%;background:#22d87a;border-radius:2px 0 0 2px" title="Positive: ${p.pos}%"></div>
+          <div style="width:${p.neu}%;background:#ffd166" title="Neutral: ${p.neu}%"></div>
+          <div style="width:${p.neg}%;background:#ff4d6d;border-radius:0 2px 2px 0" title="Negative: ${p.neg}%"></div>
         </div>
-        <div style="background:var(--surface3);border-radius:3px;height:4px;overflow:hidden">
-          <div style="width:${pct}%;height:100%;background:${p.color};border-radius:3px"></div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;background:var(--surface3);border-radius:3px;height:4px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:${p.color};border-radius:3px" title="Volume: ${p.mentions.toLocaleString()} mentions (${pct}% of top)"></div>
+          </div>
+          <div style="font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0">${pct}% of top</div>
         </div>
       </div>
-      <div style="text-align:right;flex-shrink:0;width:60px">
+      <div style="text-align:right;flex-shrink:0;min-width:52px">
         <div style="font-size:13px;font-weight:700;color:var(--text)">${p.mentions.toLocaleString()}</div>
-        <div style="font-size:10px;color:var(--green)">${p.pos}% pos</div>
+        <div style="font-size:10px;color:var(--green);margin-top:1px">${p.pos}% positive</div>
       </div>
     </div>`;
-  }).join('') + `<div class="custom-legend" style="margin-top:14px;flex-wrap:wrap;row-gap:8px">
-    <div style="width:100%;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:2px">Sentiment bar</div>
-    <div class="legend-item"><span style="display:inline-block;width:12px;height:8px;background:#22d87a;border-radius:2px;margin-right:6px"></span>Positive</div>
-    <div class="legend-item"><span style="display:inline-block;width:12px;height:8px;background:#ffd166;border-radius:2px;margin-right:6px"></span>Neutral</div>
-    <div class="legend-item"><span style="display:inline-block;width:12px;height:8px;background:#ff4d6d;border-radius:2px;margin-right:6px"></span>Negative</div>
-    <div style="width:100%;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-top:6px;margin-bottom:2px">Volume bar</div>
-    <div class="legend-item"><span style="display:inline-block;width:12px;height:4px;background:linear-gradient(90deg,#4f7cff,#1877F2);border-radius:2px;margin-right:6px"></span>Platform-colored bar = relative mention volume (% of highest platform)</div>
+  }).join('') + `<div style="display:flex;align-items:center;gap:16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);flex-shrink:0">Sentiment</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div class="legend-item"><span style="display:inline-block;width:10px;height:10px;background:#22d87a;border-radius:2px;margin-right:5px"></span>Positive</div>
+      <div class="legend-item"><span style="display:inline-block;width:10px;height:10px;background:#ffd166;border-radius:2px;margin-right:5px"></span>Neutral</div>
+      <div class="legend-item"><span style="display:inline-block;width:10px;height:10px;background:#ff4d6d;border-radius:2px;margin-right:5px"></span>Negative</div>
+    </div>
+    <div style="margin-left:auto;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3)">Volume bar = relative share of all mentions</div>
   </div>`;
 }
 
-// Competitor SOV donut
+// Competitor SOV — ranked horizontal bars
 function buildSOVChart() {
   const container = document.getElementById('comp-sov-chart');
   if (!container) return;
+
   const data = [
-    {label:'ShopRight',pct:38.4,color:'#4f7cff'},
-    {label:'FreshMart',pct:26.1,color:'#ff4d6d'},
-    {label:'Island Grocers',pct:18.8,color:'#ffd166'},
-    {label:'Cost-U-Less',pct:12.2,color:'#7c5cfc'},
-    {label:'Others',pct:4.5,color:'#5a6177'},
+    {label:'ShopRight',pct:38.4,color:'#4f7cff',isUs:true},
+    {label:'FreshMart',pct:26.1,color:'#ff4d6d',isUs:false},
+    {label:'Island Grocers',pct:18.8,color:'#ffd166',isUs:false},
+    {label:'Cost-U-Less',pct:12.2,color:'#7c5cfc',isUs:false},
+    {label:'Others',pct:4.5,color:'#5a6177',isUs:false},
   ];
-  const W=container.clientWidth||280, H=160;
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('width','100%'); svg.setAttribute('height',H);
-  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
-  const cx=W/2, cy=H/2, r=Math.min(W,H)*0.42, ir=r*0.55;
-  let angle=-Math.PI/2;
-  data.forEach(d=>{
-    const sweep=(d.pct/100)*Math.PI*2;
-    const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
-    const x2=cx+r*Math.cos(angle+sweep),y2=cy+r*Math.sin(angle+sweep);
-    const x3=cx+ir*Math.cos(angle+sweep),y3=cy+ir*Math.sin(angle+sweep);
-    const x4=cx+ir*Math.cos(angle),y4=cy+ir*Math.sin(angle);
-    const lg=sweep>Math.PI?1:0;
-    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d',`M${x1},${y1} A${r},${r} 0 ${lg} 1 ${x2},${y2} L${x3},${y3} A${ir},${ir} 0 ${lg} 0 ${x4},${y4} Z`);
-    path.setAttribute('fill',d.color); path.setAttribute('stroke','var(--surface)'); path.setAttribute('stroke-width','2');
-    svg.appendChild(path);
-    angle+=sweep;
+
+  // Hero stat at top
+  const hero = document.createElement('div');
+  hero.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)';
+  hero.innerHTML = `
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:4px">ShopRight Market Share</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:40px;color:#fff;line-height:1">38.4%</div>
+      <div style="font-size:12px;color:var(--green);font-weight:600;margin-top:4px">↑ +4.2 pts vs last quarter · #1 in Cayman Islands</div>
+    </div>
+    <div style="background:rgba(79,124,255,0.1);border:1px solid rgba(79,124,255,0.25);border-radius:12px;padding:12px 18px;text-align:center">
+      <div style="font-family:'DM Serif Display',serif;font-size:32px;color:var(--accent);line-height:1">#1</div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-top:4px">Share of<br>Voice</div>
+    </div>`;
+  container.appendChild(hero);
+
+  // Ranked bars
+  const list = document.createElement('div');
+  list.style.cssText = 'display:flex;flex-direction:column;gap:14px';
+
+  data.forEach((d, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:12px';
+
+    const rankColor = d.isUs ? 'var(--accent)' : 'var(--text3)';
+    const labelWeight = d.isUs ? '700' : '500';
+    const labelColor = d.isUs ? 'var(--text)' : 'var(--text2)';
+
+    row.innerHTML = `
+      <div style="width:16px;font-size:11px;font-weight:700;color:${rankColor};text-align:center;flex-shrink:0">${i+1}</div>
+      <div style="width:108px;font-size:13px;font-weight:${labelWeight};color:${labelColor};flex-shrink:0;display:flex;align-items:center;gap:6px">
+        ${d.isUs ? `<span style="width:6px;height:6px;background:var(--accent);border-radius:50%;display:inline-block;flex-shrink:0"></span>` : `<span style="width:6px;height:6px;background:${d.color};border-radius:50%;display:inline-block;flex-shrink:0;opacity:0.6"></span>`}
+        ${d.label}
+      </div>
+      <div style="flex:1;background:var(--surface3);border-radius:4px;height:${d.isUs ? 10 : 7}px;overflow:hidden">
+        <div style="height:100%;width:${d.pct / 38.4 * 100}%;background:${d.isUs ? 'linear-gradient(90deg,#4f7cff,#7c5cfc)' : d.color};border-radius:4px;opacity:${d.isUs ? 1 : 0.65}"></div>
+      </div>
+      <div style="width:44px;text-align:right;font-size:${d.isUs ? 14 : 12}px;font-weight:${d.isUs ? 700 : 500};color:${d.isUs ? 'var(--text)' : 'var(--text2)'};flex-shrink:0">${d.pct}%</div>`;
+
+    list.appendChild(row);
   });
-  const t1=document.createElementNS('http://www.w3.org/2000/svg','text');
-  t1.setAttribute('x',cx); t1.setAttribute('y',cy-4); t1.setAttribute('text-anchor','middle');
-  t1.setAttribute('fill','#fff'); t1.setAttribute('font-size','20'); t1.setAttribute('font-weight','700');
-  t1.setAttribute('font-family',"'DM Serif Display',serif"); t1.textContent='#1';
-  const t2=document.createElementNS('http://www.w3.org/2000/svg','text');
-  t2.setAttribute('x',cx); t2.setAttribute('y',cy+14); t2.setAttribute('text-anchor','middle');
-  t2.setAttribute('fill','#4f7cff'); t2.setAttribute('font-size','10'); t2.setAttribute('font-weight','700'); t2.textContent='Share of Voice';
-  svg.appendChild(t1); svg.appendChild(t2);
-  container.appendChild(svg);
-  const legend=document.getElementById('sov-legend');
-  data.forEach(d=>{
-    const item=document.createElement('div');
-    item.className='legend-item';
-    item.innerHTML=`<div class="legend-dot" style="background:${d.color}"></div>${d.label} (${d.pct}%)`;
-    legend.appendChild(item);
-  });
+
+  container.appendChild(list);
+
+  // Footer note
+  const note = document.createElement('div');
+  note.style.cssText = 'margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)';
+  note.textContent = 'Based on social mentions, search volume & online reviews · Cayman Islands market · MTD';
+  container.appendChild(note);
 }
 
 // Mention trend line chart
